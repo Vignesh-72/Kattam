@@ -254,10 +254,16 @@ const fetchSearchFilterOptions = (selectedCaste) => {
     const queries = {
       castes: { sql: "SELECT DISTINCT TRIM(caste) as val FROM candidates WHERE caste IS NOT NULL AND TRIM(caste) != '' ORDER BY val ASC", params: [] },
       subCastes: { sql: subCasteSql, params: selectedCaste ? [selectedCaste] : [] },
+      gothrams: { sql: "SELECT DISTINCT TRIM(gothram) as val FROM candidates WHERE gothram IS NOT NULL AND TRIM(gothram) != '' ORDER BY val ASC", params: [] },
       stars: { sql: "SELECT DISTINCT TRIM(star) as val FROM candidates WHERE star IS NOT NULL AND TRIM(star) != '' ORDER BY val ASC", params: [] },
       raasis: { sql: "SELECT DISTINCT TRIM(raasi) as val FROM candidates WHERE raasi IS NOT NULL AND TRIM(raasi) != '' ORDER BY val ASC", params: [] },
+      laknams: { sql: "SELECT DISTINCT TRIM(laknam) as val FROM candidates WHERE laknam IS NOT NULL AND TRIM(laknam) != '' ORDER BY val ASC", params: [] },
       qualifications: { sql: "SELECT DISTINCT TRIM(qualification) as val FROM candidates WHERE qualification IS NOT NULL AND TRIM(qualification) != '' ORDER BY val ASC", params: [] },
-      occupations: { sql: "SELECT DISTINCT TRIM(occupation) as val FROM candidates WHERE occupation IS NOT NULL AND TRIM(occupation) != '' ORDER BY val ASC", params: [] }
+      occupations: { sql: "SELECT DISTINCT TRIM(occupation) as val FROM candidates WHERE occupation IS NOT NULL AND TRIM(occupation) != '' ORDER BY val ASC", params: [] },
+      religions: { sql: "SELECT DISTINCT TRIM(religion) as val FROM candidates WHERE religion IS NOT NULL AND TRIM(religion) != '' ORDER BY val ASC", params: [] },
+      motherTongues: { sql: "SELECT DISTINCT TRIM(motherTongue) as val FROM candidates WHERE motherTongue IS NOT NULL AND TRIM(motherTongue) != '' ORDER BY val ASC", params: [] },
+      nativities: { sql: "SELECT DISTINCT TRIM(nativity) as val FROM candidates WHERE nativity IS NOT NULL AND TRIM(nativity) != '' ORDER BY val ASC", params: [] },
+      jobPlaces: { sql: "SELECT DISTINCT TRIM(placeOfJob) as val FROM candidates WHERE placeOfJob IS NOT NULL AND TRIM(placeOfJob) != '' ORDER BY val ASC", params: [] }
     };
 
     const results = {};

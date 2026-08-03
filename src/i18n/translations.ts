@@ -87,6 +87,13 @@ export const translations = {
     minAge: "Min Age",
     maxAge: "Max Age",
     allGenders: "All Genders",
+    allGothrams: "All Gothrams",
+    allLaknams: "All Laknams",
+    allReligions: "All Religions",
+    allMotherTongues: "All Mother Tongues",
+    allNativities: "All Nativities",
+    allJobPlaces: "All Job Locations",
+    allDiets: "All Diets",
 
     // Profile & Family
     candidateProfile: "Candidate Profile",
@@ -219,6 +226,13 @@ export const translations = {
     minAge: "குறைந்தபட்ச வயது",
     maxAge: "அதிகபட்ச வயது",
     allGenders: "அனைத்து பாலினமும்",
+    allGothrams: "எல்லா கோத்திரமும்",
+    allLaknams: "எல்லா லக்னமும்",
+    allReligions: "எல்லா மதமும்",
+    allMotherTongues: "எல்லா தாய்மொழியும்",
+    allNativities: "எல்லா சொந்த ஊரும்",
+    allJobPlaces: "எல்லா பணி இடமும்",
+    allDiets: "எல்லா உணவுப் பழக்கமும்",
 
     // Profile & Family
     candidateProfile: "வரன் விவரங்கள்",

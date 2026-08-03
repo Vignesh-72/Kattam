@@ -1,26 +1,41 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Edit, Eye, Trash2, ChevronLeft, ChevronRight, Filter, RefreshCw } from 'lucide-react';
+import { Search, Edit, Eye, Trash2, ChevronLeft, ChevronRight, Filter, RefreshCw, UserCheck, Compass, Briefcase, Heart } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 
 interface SearchOptions {
   castes: string[];
   subCastes: string[];
+  gothrams: string[];
   stars: string[];
   raasis: string[];
+  laknams: string[];
   qualifications: string[];
   occupations: string[];
+  religions: string[];
+  motherTongues: string[];
+  nativities: string[];
+  jobPlaces: string[];
 }
 
 const initialFilterState = {
   gender: '',
   caste: '',
   subCaste: '',
+  gothram: '',
   star: '',
   raasi: '',
+  laknam: '',
   maritalStatus: '',
+  religion: '',
+  motherTongue: '',
+  nativity: '',
   qualification: '',
   occupation: '',
+  placeOfJob: '',
+  diet: '',
+  partnerJobReq: '',
+  partnerHoroscopeReq: '',
   minAge: '',
   maxAge: '',
 };
@@ -34,7 +49,8 @@ export default function CandidateSearch() {
   const [activeFilters, setActiveFilters] = useState(initialFilterState);
   
   const [dbOptions, setDbOptions] = useState<SearchOptions>({
-    castes: [], subCastes: [], stars: [], raasis: [], qualifications: [], occupations: []
+    castes: [], subCastes: [], gothrams: [], stars: [], raasis: [], laknams: [],
+    qualifications: [], occupations: [], religions: [], motherTongues: [], nativities: [], jobPlaces: []
   });
   
   const [page, setPage] = useState(1);
@@ -51,25 +67,27 @@ export default function CandidateSearch() {
       if (window.api?.db?.getSearchOptions) {
         try {
           res = await window.api.db.getSearchOptions(selectedCaste);
-        } catch (_) {
-          // Fallback to secondary IPC channel if primary channel throws
-        }
+        } catch (_) {}
       }
       if (!res && window.api?.getSearchFilterOptions) {
         try {
           res = await window.api.getSearchFilterOptions(selectedCaste);
-        } catch (_) {
-          // Ignore if un-restarted electron process
-        }
+        } catch (_) {}
       }
       if (res) {
         setDbOptions(prev => ({
           castes: res.castes && res.castes.length > 0 ? res.castes : prev.castes,
           subCastes: res.subCastes || [],
+          gothrams: res.gothrams && res.gothrams.length > 0 ? res.gothrams : prev.gothrams,
           stars: res.stars && res.stars.length > 0 ? res.stars : prev.stars,
           raasis: res.raasis && res.raasis.length > 0 ? res.raasis : prev.raasis,
+          laknams: res.laknams && res.laknams.length > 0 ? res.laknams : prev.laknams,
           qualifications: res.qualifications && res.qualifications.length > 0 ? res.qualifications : prev.qualifications,
           occupations: res.occupations && res.occupations.length > 0 ? res.occupations : prev.occupations,
+          religions: res.religions && res.religions.length > 0 ? res.religions : prev.religions,
+          motherTongues: res.motherTongues && res.motherTongues.length > 0 ? res.motherTongues : prev.motherTongues,
+          nativities: res.nativities && res.nativities.length > 0 ? res.nativities : prev.nativities,
+          jobPlaces: res.jobPlaces && res.jobPlaces.length > 0 ? res.jobPlaces : prev.jobPlaces,
         }));
       }
     } catch (err) {
@@ -90,10 +108,16 @@ export default function CandidateSearch() {
   // Options derived strictly from database queries
   const casteOptions = useMemo(() => dbOptions.castes || [], [dbOptions.castes]);
   const subCasteOptions = useMemo(() => dbOptions.subCastes || [], [dbOptions.subCastes]);
+  const gothramOptions = useMemo(() => dbOptions.gothrams || [], [dbOptions.gothrams]);
   const starOptions = useMemo(() => dbOptions.stars || [], [dbOptions.stars]);
   const raasiOptions = useMemo(() => dbOptions.raasis || [], [dbOptions.raasis]);
+  const laknamOptions = useMemo(() => dbOptions.laknams || [], [dbOptions.laknams]);
   const qualificationOptions = useMemo(() => dbOptions.qualifications || [], [dbOptions.qualifications]);
   const occupationOptions = useMemo(() => dbOptions.occupations || [], [dbOptions.occupations]);
+  const religionOptions = useMemo(() => dbOptions.religions || [], [dbOptions.religions]);
+  const motherTongueOptions = useMemo(() => dbOptions.motherTongues || [], [dbOptions.motherTongues]);
+  const nativityOptions = useMemo(() => dbOptions.nativities || [], [dbOptions.nativities]);
+  const jobPlaceOptions = useMemo(() => dbOptions.jobPlaces || [], [dbOptions.jobPlaces]);
 
   // Debounce for standard text search
   useEffect(() => {
@@ -141,11 +165,31 @@ export default function CandidateSearch() {
         }
       }
     } else {
-      // Advanced Multi-Criteria Filter Query Builder with Case-Insensitive / LIKE Matching
+      // Comprehensive Advanced Multi-Criteria Filter Query Builder
       if (activeFilters.gender) {
         whereConditions.push('LOWER(gender) = LOWER(?)');
         countParams.push(activeFilters.gender);
         dataParams.push(activeFilters.gender);
+      }
+      if (activeFilters.maritalStatus) {
+        whereConditions.push('LOWER(TRIM(maritalStatus)) = LOWER(TRIM(?))');
+        countParams.push(activeFilters.maritalStatus);
+        dataParams.push(activeFilters.maritalStatus);
+      }
+      if (activeFilters.religion) {
+        whereConditions.push('LOWER(TRIM(religion)) = LOWER(TRIM(?))');
+        countParams.push(activeFilters.religion);
+        dataParams.push(activeFilters.religion);
+      }
+      if (activeFilters.motherTongue) {
+        whereConditions.push('LOWER(TRIM(motherTongue)) = LOWER(TRIM(?))');
+        countParams.push(activeFilters.motherTongue);
+        dataParams.push(activeFilters.motherTongue);
+      }
+      if (activeFilters.nativity) {
+        whereConditions.push('LOWER(TRIM(nativity)) = LOWER(TRIM(?))');
+        countParams.push(activeFilters.nativity);
+        dataParams.push(activeFilters.nativity);
       }
       if (activeFilters.caste) {
         whereConditions.push('LOWER(TRIM(caste)) = LOWER(TRIM(?))');
@@ -157,6 +201,11 @@ export default function CandidateSearch() {
         countParams.push(activeFilters.subCaste);
         dataParams.push(activeFilters.subCaste);
       }
+      if (activeFilters.gothram) {
+        whereConditions.push('LOWER(TRIM(gothram)) = LOWER(TRIM(?))');
+        countParams.push(activeFilters.gothram);
+        dataParams.push(activeFilters.gothram);
+      }
       if (activeFilters.star) {
         whereConditions.push('LOWER(TRIM(star)) = LOWER(TRIM(?))');
         countParams.push(activeFilters.star);
@@ -167,10 +216,10 @@ export default function CandidateSearch() {
         countParams.push(activeFilters.raasi);
         dataParams.push(activeFilters.raasi);
       }
-      if (activeFilters.maritalStatus) {
-        whereConditions.push('LOWER(TRIM(maritalStatus)) = LOWER(TRIM(?))');
-        countParams.push(activeFilters.maritalStatus);
-        dataParams.push(activeFilters.maritalStatus);
+      if (activeFilters.laknam) {
+        whereConditions.push('LOWER(TRIM(laknam)) = LOWER(TRIM(?))');
+        countParams.push(activeFilters.laknam);
+        dataParams.push(activeFilters.laknam);
       }
       if (activeFilters.qualification) {
         whereConditions.push('LOWER(qualification) LIKE LOWER(?)');
@@ -183,6 +232,26 @@ export default function CandidateSearch() {
         const oTerm = `%${activeFilters.occupation.trim()}%`;
         countParams.push(oTerm);
         dataParams.push(oTerm);
+      }
+      if (activeFilters.placeOfJob) {
+        whereConditions.push('LOWER(TRIM(placeOfJob)) = LOWER(TRIM(?))');
+        countParams.push(activeFilters.placeOfJob);
+        dataParams.push(activeFilters.placeOfJob);
+      }
+      if (activeFilters.diet) {
+        whereConditions.push('LOWER(TRIM(diet)) = LOWER(TRIM(?))');
+        countParams.push(activeFilters.diet);
+        dataParams.push(activeFilters.diet);
+      }
+      if (activeFilters.partnerJobReq) {
+        whereConditions.push('LOWER(TRIM(partnerJobReq)) = LOWER(TRIM(?))');
+        countParams.push(activeFilters.partnerJobReq);
+        dataParams.push(activeFilters.partnerJobReq);
+      }
+      if (activeFilters.partnerHoroscopeReq) {
+        whereConditions.push('LOWER(TRIM(partnerHoroscopeReq)) = LOWER(TRIM(?))');
+        countParams.push(activeFilters.partnerHoroscopeReq);
+        dataParams.push(activeFilters.partnerHoroscopeReq);
       }
       if (activeFilters.minAge) {
         whereConditions.push("CAST((strftime('%Y', 'now') - strftime('%Y', dob)) AS INT) >= ?");
@@ -305,127 +374,255 @@ export default function CandidateSearch() {
         </div>
       )}
 
-      {/* Tab 2: Advanced Multi-Filter Grid Panel */}
+      {/* Tab 2: Comprehensive Advanced Multi-Filter Panel */}
       {searchMode === 'advanced' && (
         <div style={{ marginBottom: '28px', backgroundColor: 'var(--card-bg)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-            
-            {/* Gender */}
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('gender')}</label>
-              <select className="form-control" value={filters.gender} onChange={e => handleFilterChange('gender', e.target.value)}>
-                <option value="">{t('allGenders')}</option>
-                <option value="Male">{t('male')}</option>
-                <option value="Female">{t('female')}</option>
-              </select>
-            </div>
+          
+          {/* Section 1: Basic & Demographics */}
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ fontSize: '0.9rem', color: 'var(--primary-color)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
+              <UserCheck size={16} /> Basic & Demographics
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
+              {/* Gender */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('gender')}</label>
+                <select className="form-control" value={filters.gender} onChange={e => handleFilterChange('gender', e.target.value)}>
+                  <option value="">{t('allGenders')}</option>
+                  <option value="Male">{t('male')}</option>
+                  <option value="Female">{t('female')}</option>
+                </select>
+              </div>
 
-            {/* Caste - Dynamically Queried from Database */}
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('caste')}</label>
-              <select className="form-control" value={filters.caste} onChange={e => handleFilterChange('caste', e.target.value)}>
-                <option value="">{t('allCastes')}</option>
-                {casteOptions.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
+              {/* Marital Status */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('maritalStatus')}</label>
+                <select className="form-control" value={filters.maritalStatus} onChange={e => handleFilterChange('maritalStatus', e.target.value)}>
+                  <option value="">{t('select')}</option>
+                  <option value="Unmarried">{t('unmarried')}</option>
+                  <option value="Married">{t('married')}</option>
+                  <option value="Divorced">{t('divorced')}</option>
+                  <option value="Widowed">{t('widowed')}</option>
+                </select>
+              </div>
 
-            {/* Sub Caste - Dynamically Queried & Dependent on Selected Caste */}
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('subCaste')}</label>
-              <select className="form-control" value={filters.subCaste} onChange={e => handleFilterChange('subCaste', e.target.value)}>
-                <option value="">{t('allSubCastes')}</option>
-                {subCasteOptions.map(sc => (
-                  <option key={sc} value={sc}>{sc}</option>
-                ))}
-              </select>
-            </div>
+              {/* Religion */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('religion')}</label>
+                <select className="form-control" value={filters.religion} onChange={e => handleFilterChange('religion', e.target.value)}>
+                  <option value="">{t('allReligions') || "All Religions"}</option>
+                  {religionOptions.map(r => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Star - Dynamically Queried from Database */}
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('star')}</label>
-              <select className="form-control" value={filters.star} onChange={e => handleFilterChange('star', e.target.value)}>
-                <option value="">{t('allStars')}</option>
-                {starOptions.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
+              {/* Mother Tongue */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('motherTongue')}</label>
+                <select className="form-control" value={filters.motherTongue} onChange={e => handleFilterChange('motherTongue', e.target.value)}>
+                  <option value="">{t('allMotherTongues') || "All Mother Tongues"}</option>
+                  {motherTongueOptions.map(mt => (
+                    <option key={mt} value={mt}>{mt}</option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Raasi - Dynamically Queried from Database */}
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('raasi')}</label>
-              <select className="form-control" value={filters.raasi} onChange={e => handleFilterChange('raasi', e.target.value)}>
-                <option value="">{t('allRaasis')}</option>
-                {raasiOptions.map(r => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </div>
+              {/* Nativity */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('nativity')}</label>
+                <select className="form-control" value={filters.nativity} onChange={e => handleFilterChange('nativity', e.target.value)}>
+                  <option value="">{t('allNativities') || "All Nativities"}</option>
+                  {nativityOptions.map(n => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Marital Status */}
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('maritalStatus')}</label>
-              <select className="form-control" value={filters.maritalStatus} onChange={e => handleFilterChange('maritalStatus', e.target.value)}>
-                <option value="">{t('select')}</option>
-                <option value="Unmarried">{t('unmarried')}</option>
-                <option value="Married">{t('married')}</option>
-                <option value="Divorced">{t('divorced')}</option>
-                <option value="Widowed">{t('widowed')}</option>
-              </select>
-            </div>
+              {/* Min Age */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('minAge')}</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="18"
+                  min="18"
+                  max="80"
+                  value={filters.minAge}
+                  onChange={e => handleFilterChange('minAge', e.target.value)}
+                />
+              </div>
 
-            {/* Qualification - Dynamically Queried from Database */}
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('qualification')}</label>
-              <select className="form-control" value={filters.qualification} onChange={e => handleFilterChange('qualification', e.target.value)}>
-                <option value="">{t('allQualifications')}</option>
-                {qualificationOptions.map(q => (
-                  <option key={q} value={q}>{q}</option>
-                ))}
-              </select>
+              {/* Max Age */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('maxAge')}</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="60"
+                  min="18"
+                  max="80"
+                  value={filters.maxAge}
+                  onChange={e => handleFilterChange('maxAge', e.target.value)}
+                />
+              </div>
             </div>
+          </div>
 
-            {/* Occupation - Dynamically Queried from Database */}
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('occupation')}</label>
-              <select className="form-control" value={filters.occupation} onChange={e => handleFilterChange('occupation', e.target.value)}>
-                <option value="">{t('allOccupations')}</option>
-                {occupationOptions.map(o => (
-                  <option key={o} value={o}>{o}</option>
-                ))}
-              </select>
+          {/* Section 2: Community & Horoscope */}
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ fontSize: '0.9rem', color: 'var(--primary-color)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
+              <Compass size={16} /> Community & Horoscope
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
+              {/* Caste */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('caste')}</label>
+                <select className="form-control" value={filters.caste} onChange={e => handleFilterChange('caste', e.target.value)}>
+                  <option value="">{t('allCastes')}</option>
+                  {casteOptions.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Sub Caste */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('subCaste')}</label>
+                <select className="form-control" value={filters.subCaste} onChange={e => handleFilterChange('subCaste', e.target.value)}>
+                  <option value="">{t('allSubCastes')}</option>
+                  {subCasteOptions.map(sc => (
+                    <option key={sc} value={sc}>{sc}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Gothram */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('gothram')}</label>
+                <select className="form-control" value={filters.gothram} onChange={e => handleFilterChange('gothram', e.target.value)}>
+                  <option value="">{t('allGothrams') || "All Gothrams"}</option>
+                  {gothramOptions.map(g => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Star */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('star')}</label>
+                <select className="form-control" value={filters.star} onChange={e => handleFilterChange('star', e.target.value)}>
+                  <option value="">{t('allStars')}</option>
+                  {starOptions.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Raasi */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('raasi')}</label>
+                <select className="form-control" value={filters.raasi} onChange={e => handleFilterChange('raasi', e.target.value)}>
+                  <option value="">{t('allRaasis')}</option>
+                  {raasiOptions.map(r => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Laknam */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('laknam')}</label>
+                <select className="form-control" value={filters.laknam} onChange={e => handleFilterChange('laknam', e.target.value)}>
+                  <option value="">{t('allLaknams') || "All Laknams"}</option>
+                  {laknamOptions.map(l => (
+                    <option key={l} value={l}>{l}</option>
+                  ))}
+                </select>
+              </div>
             </div>
+          </div>
 
-            {/* Min Age */}
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('minAge')}</label>
-              <input
-                type="number"
-                className="form-control"
-                placeholder="18"
-                min="18"
-                max="80"
-                value={filters.minAge}
-                onChange={e => handleFilterChange('minAge', e.target.value)}
-              />
+          {/* Section 3: Education & Career */}
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ fontSize: '0.9rem', color: 'var(--primary-color)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
+              <Briefcase size={16} /> Education & Career
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
+              {/* Qualification */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('qualification')}</label>
+                <select className="form-control" value={filters.qualification} onChange={e => handleFilterChange('qualification', e.target.value)}>
+                  <option value="">{t('allQualifications')}</option>
+                  {qualificationOptions.map(q => (
+                    <option key={q} value={q}>{q}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Occupation */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('occupation')}</label>
+                <select className="form-control" value={filters.occupation} onChange={e => handleFilterChange('occupation', e.target.value)}>
+                  <option value="">{t('allOccupations')}</option>
+                  {occupationOptions.map(o => (
+                    <option key={o} value={o}>{o}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Place of Job */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('placeOfJob')}</label>
+                <select className="form-control" value={filters.placeOfJob} onChange={e => handleFilterChange('placeOfJob', e.target.value)}>
+                  <option value="">{t('allJobPlaces') || "All Job Locations"}</option>
+                  {jobPlaceOptions.map(jp => (
+                    <option key={jp} value={jp}>{jp}</option>
+                  ))}
+                </select>
+              </div>
             </div>
+          </div>
 
-            {/* Max Age */}
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('maxAge')}</label>
-              <input
-                type="number"
-                className="form-control"
-                placeholder="60"
-                min="18"
-                max="80"
-                value={filters.maxAge}
-                onChange={e => handleFilterChange('maxAge', e.target.value)}
-              />
+          {/* Section 4: Lifestyle & Partner Expectations */}
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ fontSize: '0.9rem', color: 'var(--primary-color)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
+              <Heart size={16} /> Lifestyle & Expectations
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
+              {/* Diet */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('diet')}</label>
+                <select className="form-control" value={filters.diet} onChange={e => handleFilterChange('diet', e.target.value)}>
+                  <option value="">{t('allDiets') || "All Diets"}</option>
+                  <option value="Vegetarian">{t('vegetarian')}</option>
+                  <option value="Non-Vegetarian">{t('nonVegetarian')}</option>
+                  <option value="Eggetarian">{t('eggetarian')}</option>
+                </select>
+              </div>
+
+              {/* Partner Job Requirement */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('partnerJobReq')}</label>
+                <select className="form-control" value={filters.partnerJobReq} onChange={e => handleFilterChange('partnerJobReq', e.target.value)}>
+                  <option value="">{t('select')}</option>
+                  <option value="Required">{t('required')}</option>
+                  <option value="Not required">{t('notRequired')}</option>
+                  <option value="Optional">{t('optional')}</option>
+                </select>
+              </div>
+
+              {/* Partner Horoscope Requirement */}
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('partnerHoroscopeReq')}</label>
+                <select className="form-control" value={filters.partnerHoroscopeReq} onChange={e => handleFilterChange('partnerHoroscopeReq', e.target.value)}>
+                  <option value="">{t('select')}</option>
+                  <option value="Required">{t('required')}</option>
+                  <option value="Not required">{t('notRequired')}</option>
+                  <option value="Optional">{t('optional')}</option>
+                </select>
+              </div>
             </div>
-
           </div>
 
           {/* Action Buttons */}
