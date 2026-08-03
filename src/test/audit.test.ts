@@ -72,11 +72,11 @@ describe('PERF-02 · LanguageContext — localStorage persistence logic', () => 
     expect(stored).toBe('ta');
   });
 
-  it('defaults to "en" when no value is stored', () => {
+  it('defaults to "ta" when no value is stored', () => {
     mockStorage.clear();
     const stored = mockStorage.getItem('kattam_lang');
-    const lang = (stored as 'en' | 'ta') || 'en';
-    expect(lang).toBe('en');
+    const lang = (stored as 'en' | 'ta') || 'ta';
+    expect(lang).toBe('ta');
   });
 
   it('persists language change correctly', () => {

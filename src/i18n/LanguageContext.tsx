@@ -14,7 +14,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // Previously this reset to 'en' on every app restart, forcing Tamil-speaking
   // operators to re-toggle the language every session (multiple times per day).
   const [language, setLanguageState] = useState<Language>(
-    () => (localStorage.getItem('kattam_lang') as Language) || 'en'
+    () => (localStorage.getItem('kattam_lang') as Language) || 'ta'
   );
 
   const setLanguage = (lang: Language) => {
