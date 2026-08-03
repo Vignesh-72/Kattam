@@ -42,10 +42,60 @@ export default function DataEntry() {
   });
 
   const [activeSection, setActiveSection] = useState('personal');
+  const [hasDraft, setHasDraft] = useState(false);
 
   const scrollTo = (id: string) => {
     setActiveSection(id);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Check for unsaved draft from previous session on mount
+  useEffect(() => {
+    if (!id) {
+      const savedDraft = localStorage.getItem('kattam_form_draft');
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          if (parsed && parsed.formData && (parsed.formData.fullName || parsed.formData.caste || parsed.formData.contactNumber)) {
+            setHasDraft(true);
+          }
+        } catch (_) {}
+      }
+    }
+  }, [id]);
+
+  // Debounced auto-save hook: saves unsaved form inputs to localStorage every 1,500ms
+  useEffect(() => {
+    if (id) return;
+    const timer = setTimeout(() => {
+      if (formData.fullName || formData.caste || formData.contactNumber) {
+        localStorage.setItem('kattam_form_draft', JSON.stringify({
+          formData, rasiData, amsamData, extraData, timestamp: Date.now()
+        }));
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [formData, rasiData, amsamData, extraData, id]);
+
+  const handleRestoreDraft = () => {
+    const savedDraft = localStorage.getItem('kattam_form_draft');
+    if (savedDraft) {
+      try {
+        const { formData: f, rasiData: r, amsamData: a, extraData: e } = JSON.parse(savedDraft);
+        if (f) setFormData(f);
+        if (r) setRasiData(r);
+        if (a) setAmsamData(a);
+        if (e) setExtraData(e);
+      } catch (err) {
+        console.error('Failed to restore draft:', err);
+      }
+    }
+    setHasDraft(false);
+  };
+
+  const handleDiscardDraft = () => {
+    localStorage.removeItem('kattam_form_draft');
+    setHasDraft(false);
   };
 
   useEffect(() => {
@@ -92,9 +142,6 @@ export default function DataEntry() {
     }
   };
 
-  // MEM-02 / MEM-05: Replaced FileReader + Base64 + IPC transfer with native OS dialog.
-  // The old approach created a ~14.8MB RAM spike per photo (Base64 string + structured clone).
-  // Now only an ~80-byte file path string crosses the IPC bridge — zero memory overhead.
   const handlePhotoUpload = async (fieldName: string) => {
     const savedPath = await window.api.pickAndSaveImage(`${Date.now()}_photo.jpg`);
     if (savedPath) setFormData((prev: any) => ({ ...prev, [fieldName]: savedPath }));
@@ -117,6 +164,9 @@ export default function DataEntry() {
       const placeholders = keys.map(() => '?').join(', ');
       await window.api.db.run(`INSERT INTO candidates (${keys.join(', ')}) VALUES (${placeholders})`, values);
     }
+    // Clear unsaved draft ONLY after database IPC confirms successful write
+    localStorage.removeItem('kattam_form_draft');
+    setHasDraft(false);
     navigate('/search');
   };
 
@@ -152,14 +202,44 @@ export default function DataEntry() {
 
   return (
     <div className="form-layout-wrapper page-transition">
-      <div className="form-container">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-          <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)}>
-            <ArrowLeft size={16} /> {t('back')}
-          </button>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, fontFamily: 'var(--font-serif)', color: 'var(--text-main)' }}>{id ? t('editProfile') : t('newProfile')}</h2>
-          <div style={{ width: '80px' }}></div>
-        </div>
+        {/* Unsaved Draft Power-Loss Recovery Banner */}
+        {hasDraft && (
+          <div style={{
+            backgroundColor: '#fffaf0',
+            border: '1px solid #feebc8',
+            borderRadius: '10px',
+            padding: '16px 20px',
+            marginBottom: '28px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            boxShadow: '0 2px 8px rgba(221, 107, 32, 0.12)'
+          }}>
+            <div style={{ color: '#c05621', fontWeight: 600, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <RefreshCw size={20} />
+              <span>{t('draftDetected')}</span>
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleRestoreDraft}
+                style={{ padding: '8px 18px', backgroundColor: '#dd6b20', borderColor: '#dd6b20', fontWeight: 600 }}
+              >
+                {t('restoreDraft')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleDiscardDraft}
+                style={{ padding: '8px 16px', fontWeight: 600 }}
+              >
+                {t('discardDraft')}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* BUG-04: Removed onSubmit={handleSave}. Both save buttons are type="button"
             with explicit onClick, so Enter-key presses no longer trigger a double-submit

@@ -72,8 +72,60 @@ function runMigrations(db) {
   });
 }
 
+function performRollingDailyBackup(userDataPath, dbPath) {
+  try {
+    const backupDir = path.join(userDataPath, 'backups');
+    if (!fs.existsSync(backupDir)) {
+      fs.mkdirSync(backupDir, { recursive: true });
+    }
+    const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '_');
+    const backupFile = path.join(backupDir, `kattam_backup_${todayStr}.db`);
+
+    if (!fs.existsSync(backupFile) && fs.existsSync(dbPath)) {
+      console.log(`[Backup] Creating rolling daily backup: ${backupFile}`);
+      const data = fs.readFileSync(dbPath);
+      const fdDest = fs.openSync(backupFile, 'w');
+      fs.writeSync(fdDest, data);
+      fs.fsyncSync(fdDest);
+      fs.closeSync(fdDest);
+      console.log('[Backup] Daily backup completed and fsynced to disk.');
+    }
+
+    // Clean up backups older than 7 days
+    const files = fs.readdirSync(backupDir);
+    const now = Date.now();
+    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+    files.forEach(file => {
+      if (file.startsWith('kattam_backup_') && file.endsWith('.db')) {
+        const filePath = path.join(backupDir, file);
+        const stats = fs.statSync(filePath);
+        if (now - stats.mtimeMs > SEVEN_DAYS_MS) {
+          console.log(`[Backup] Purging backup older than 7 days: ${file}`);
+          try { fs.unlinkSync(filePath); } catch (_) {}
+        }
+      }
+    });
+  } catch (err) {
+    console.error('[Backup] Rolling daily backup failed gracefully:', err);
+  }
+}
+
+function copyFileWithFsync(src, dest) {
+  const data = fs.readFileSync(src);
+  const fd = fs.openSync(dest, 'w');
+  fs.writeSync(fd, data);
+  fs.fsyncSync(fd);
+  fs.closeSync(fd);
+}
+
 function initDB() {
-  const dbPath = path.join(app.getPath('userData'), 'matrimony.db');
+  const userDataPath = app.getPath('userData');
+  const dbPath = path.join(userDataPath, 'matrimony.db');
+  
+  // Execute automated 7-day rolling daily backup on startup
+  performRollingDailyBackup(userDataPath, dbPath);
+
   db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
       console.error('Error opening database:', err);
@@ -82,15 +134,30 @@ function initDB() {
     console.log('[DB] Connected at:', dbPath);
 
     db.serialize(() => {
-      // ─── MEM-03: WAL mode + Performance PRAGMAs ──────────────────────────
-      // WAL = Write-Ahead Logging: non-blocking writes on slow HDDs.
-      // Without WAL, every INSERT locks the entire .db file for 20–150ms.
+      // ─── HARDENED POWER-LOSS & DURABILITY PRAGMAS ───────────────────────
+      // WAL = Write-Ahead Logging for atomic transaction support
       db.run('PRAGMA journal_mode = WAL');
-      db.run('PRAGMA synchronous = NORMAL');  // Faster than FULL, still crash-safe
-      db.run('PRAGMA cache_size = -8000');    // 8MB page cache held in RAM
-      db.run('PRAGMA temp_store = MEMORY');   // Temp tables go to RAM, not disk
-      db.run('PRAGMA mmap_size = 30000000');  // 30MB memory-mapped I/O
-      db.run('PRAGMA auto_vacuum = INCREMENTAL'); // Prevents long-term SQLite database file fragmentation
+      // FULL = Mandatory fsync() on every transaction commit before returning
+      db.run('PRAGMA synchronous = FULL');
+      // busy_timeout = Prevents write lock collisions
+      db.run('PRAGMA busy_timeout = 5000');
+      // temp_store = Keep temporary tables in RAM to avoid incomplete temp files on disk cut
+      db.run('PRAGMA temp_store = MEMORY');
+      db.run('PRAGMA cache_size = -8000');
+      db.run('PRAGMA mmap_size = 30000000');
+      db.run('PRAGMA auto_vacuum = INCREMENTAL');
+
+      // ─── STARTUP DIAGNOSTICS & SELF-HEALING ──────────────────────────────
+      db.get('PRAGMA quick_check;', (checkErr, row) => {
+        const status = row ? (row.quick_check || Object.values(row)[0]) : 'error';
+        if (checkErr || status !== 'ok') {
+          console.warn('[DB Integrity Warning] Quick check issue detected:', checkErr || status);
+          console.log('[DB Self-Healing] Executing PRAGMA reindex to rebuild indexes...');
+          db.run('PRAGMA reindex;');
+        } else {
+          console.log('[DB Integrity] PRAGMA quick_check passed: ok');
+        }
+      });
 
       // ─── Main candidates table ────────────────────────────────────────────
       db.run(`
@@ -300,19 +367,19 @@ const fetchSearchFilterOptions = (selectedCaste) => {
 ipcMain.handle('db:getSearchOptions', (event, selectedCaste) => fetchSearchFilterOptions(selectedCaste));
 ipcMain.handle('get-search-filter-options', (event, selectedCaste) => fetchSearchFilterOptions(selectedCaste));
 
-// ─── IPC: MEM-01 Fix — Async image save (replaces blocking writeFileSync) ────
+// ─── IPC: Physical Asset Disk Flushing (fsync) ───────────────────────────────
 ipcMain.handle('save-image', async (event, { data, fileName }) => {
   const imagesDir = path.join(app.getPath('userData'), 'images');
   await fs.promises.mkdir(imagesDir, { recursive: true });
   const filePath = path.join(imagesDir, fileName);
-  // MEM-01: was fs.writeFileSync — blocked main thread for 200–800ms on HDD
-  await fs.promises.writeFile(filePath, Buffer.from(data, 'base64'));
+  const buffer = Buffer.from(data, 'base64');
+  const fd = fs.openSync(filePath, 'w');
+  fs.writeSync(fd, buffer);
+  fs.fsyncSync(fd); // Force physical disk controller flush
+  fs.closeSync(fd);
   return filePath;
 });
 
-// ─── IPC: MEM-02 + MEM-05 Fix — Zero-memory photo upload via dialog ──────────
-// Opens native OS file picker. Only a file path string (~80 bytes) crosses the
-// IPC boundary — eliminates the 14.8MB structured-clone burst from Base64 transfer.
 ipcMain.handle('pick-and-save-image', async (event, fileName) => {
   const result = await dialog.showOpenDialog(mainWindow, {
     title: 'Select Candidate Photo',
@@ -325,7 +392,7 @@ ipcMain.handle('pick-and-save-image', async (event, fileName) => {
   const imagesDir = path.join(app.getPath('userData'), 'images');
   await fs.promises.mkdir(imagesDir, { recursive: true });
   const dest = path.join(imagesDir, fileName);
-  await fs.promises.copyFile(src, dest);
+  copyFileWithFsync(src, dest);
   return dest;
 });
 

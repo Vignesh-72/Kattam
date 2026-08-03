@@ -105,6 +105,9 @@ export const translations = {
     lastPage: "Last",
     previousPage: "Previous",
     nextPage: "Next",
+    draftDetected: "Unsaved draft detected from previous session!",
+    restoreDraft: "Restore Draft",
+    discardDraft: "Discard",
 
     // Profile & Family
     candidateProfile: "Candidate Profile",
@@ -255,6 +258,9 @@ export const translations = {
     lastPage: "கடைசி",
     previousPage: "முந்தைய",
     nextPage: "அடுத்த",
+    draftDetected: "முந்தைய அமைப்பிலிருந்து சேமிக்கப்படாத விவரங்கள் கண்டறியப்பட்டன!",
+    restoreDraft: "மீட்டெடு",
+    discardDraft: "நீக்கு",
 
     // Profile & Family
     candidateProfile: "வரன் விவரங்கள்",

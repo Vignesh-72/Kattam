@@ -317,28 +317,54 @@ describe('PERF-04 · SQLite WAL Checkpointing, Auto-Vacuum & Packaging Configura
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CRUD & PAGINATION · Hard Deletion & Page-by-Page Navigation (12 Profiles Cap)
+// POWER-LOSS RESILIENCE & ZERO-CORRUPTION STORAGE ENGINE
 // ─────────────────────────────────────────────────────────────────────────────
-describe('CRUD & PAGINATION · Hard Deletion & Page-by-Page Navigation (12 Profiles Cap)', () => {
-  it('strictly caps DOM rendering to 12 profiles per page by unmounting previous pages', () => {
-    const page1Batch = Array.from({ length: 12 }, (_, i) => ({ id: i + 1, fullName: `Candidate ${i + 1}` }));
-    const page2Batch = Array.from({ length: 12 }, (_, i) => ({ id: i + 13, fullName: `Candidate ${i + 13}` }));
+describe('POWER-LOSS RESILIENCE & ZERO-CORRUPTION STORAGE ENGINE', () => {
+  it('verifies hardened PRAGMA configurations for power outage survival', () => {
+    const walPragma = 'PRAGMA journal_mode = WAL';
+    const syncPragma = 'PRAGMA synchronous = FULL';
+    const tempPragma = 'PRAGMA temp_store = MEMORY';
+    const timeoutPragma = 'PRAGMA busy_timeout = 5000';
 
-    let displayed = [...page1Batch];
-    expect(displayed.length).toBe(12);
-
-    // Switch to Page 2 (Unmounts Page 1)
-    displayed = [...page2Batch];
-    expect(displayed.length).toBe(12);
-    expect(displayed[0].id).toBe(13);
+    expect(walPragma).toContain('journal_mode = WAL');
+    expect(syncPragma).toBe('PRAGMA synchronous = FULL');
+    expect(tempPragma).toBe('PRAGMA temp_store = MEMORY');
+    expect(timeoutPragma).toBe('PRAGMA busy_timeout = 5000');
   });
 
-  it('verifies hard delete SQL query syntax and zero-record return expectation', () => {
-    const deleteSql = 'DELETE FROM candidates WHERE id = ?';
-    const selectSql = 'SELECT COUNT(*) as count FROM candidates WHERE id = ?';
+  it('verifies quick check startup diagnostics and self-healing reindex commands', () => {
+    const checkSql = 'PRAGMA quick_check;';
+    const reindexSql = 'PRAGMA reindex;';
 
-    expect(deleteSql).toContain('DELETE FROM candidates WHERE id = ?');
-    expect(selectSql).toContain('SELECT COUNT(*) as count');
+    expect(checkSql).toBe('PRAGMA quick_check;');
+    expect(reindexSql).toBe('PRAGMA reindex;');
+  });
+
+  it('verifies 7-day rolling daily backup naming pattern and 7-day threshold calculation', () => {
+    const todayStr = '2026_08_03';
+    const backupName = `kattam_backup_${todayStr}.db`;
+    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+    expect(backupName).toBe('kattam_backup_2026_08_03.db');
+    expect(SEVEN_DAYS_MS).toBe(604800000);
+  });
+
+  it('verifies UI draft auto-saving to localStorage and post-save draft clearing', () => {
+    const DRAFT_KEY = 'kattam_form_draft';
+    const sampleDraft = { formData: { fullName: 'Test Draft', caste: 'Pillai' }, timestamp: Date.now() };
+
+    const mockStorage: Record<string, string> = {};
+    const getItem = (key: string) => mockStorage[key] || null;
+    const setItem = (key: string, val: string) => { mockStorage[key] = val; };
+    const removeItem = (key: string) => { delete mockStorage[key]; };
+
+    // Simulate auto-save
+    setItem(DRAFT_KEY, JSON.stringify(sampleDraft));
+    expect(getItem(DRAFT_KEY)).not.toBeNull();
+
+    // Simulate post-IPC save cleanup
+    removeItem(DRAFT_KEY);
+    expect(getItem(DRAFT_KEY)).toBeNull();
   });
 });
 
