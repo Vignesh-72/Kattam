@@ -58,11 +58,9 @@ interface SearchCache {
 }
 
 let searchCache: SearchCache | null = null;
-let cachedDbOptions: SearchOptions | null = null;
 
 export function invalidateSearchCache() {
   searchCache = null;
-  cachedDbOptions = null;
 }
 
 export default function CandidateSearch() {
@@ -73,7 +71,7 @@ export default function CandidateSearch() {
   const [filters, setFilters] = useState(() => searchCache?.filters || initialFilterState);
   const [activeFilters, setActiveFilters] = useState(() => searchCache?.activeFilters || initialFilterState);
   
-  const [dbOptions, setDbOptions] = useState<SearchOptions>(() => cachedDbOptions || searchCache?.dbOptions || {
+  const [dbOptions, setDbOptions] = useState<SearchOptions>(() => searchCache?.dbOptions || {
     castes: [], subCastes: [], gothrams: [], stars: [], raasis: [], laknams: [],
     qualifications: [], occupations: [], religions: [], motherTongues: [], nativities: [], jobPlaces: [],
     diets: [], partnerJobReqs: [], partnerHoroscopeReqs: [], maritalStatuses: []
@@ -83,7 +81,6 @@ export default function CandidateSearch() {
   const [totalPages, setTotalPages] = useState(() => searchCache?.totalPages || 1);
   const [totalCount, setTotalCount] = useState(() => searchCache?.totalCount || 0);
   const [loading, setLoading] = useState(() => !searchCache);
-  const isInitialMount = useRef(true);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const PAGE_SIZE = 12;
@@ -103,7 +100,7 @@ export default function CandidateSearch() {
         } catch (_) {}
       }
       if (res) {
-        const opts: SearchOptions = {
+        setDbOptions({
           castes: res.castes || [],
           subCastes: res.subCastes || [],
           gothrams: res.gothrams || [],
@@ -120,23 +117,16 @@ export default function CandidateSearch() {
           partnerJobReqs: res.partnerJobReqs || [],
           partnerHoroscopeReqs: res.partnerHoroscopeReqs || [],
           maritalStatuses: res.maritalStatuses || [],
-        };
-        cachedDbOptions = opts;
-        setDbOptions(opts);
+        });
       }
     } catch (err) {
       console.error('[CandidateSearch] Error fetching DB filter options:', err);
     }
   }, []);
 
-  // Fetch distinct database filter options only if not already cached, deferred off main scroll thread
+  // Fetch initial distinct database filter options on component mount
   useEffect(() => {
-    if (!cachedDbOptions || cachedDbOptions.castes.length === 0) {
-      const timer = setTimeout(() => {
-        fetchFilterOptions();
-      }, 150);
-      return () => clearTimeout(timer);
-    }
+    fetchFilterOptions();
   }, [fetchFilterOptions]);
 
   // Options derived strictly from database queries
@@ -348,17 +338,11 @@ export default function CandidateSearch() {
     } finally {
       setLoading(false);
     }
-  }, [searchMode, activeSearchTerm, activeFilters, searchTerm, filters, dbOptions]);
+  }, [searchMode, activeSearchTerm, activeFilters]);
 
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      if (searchCache && searchCache.candidates.length > 0 && searchCache.page === page) {
-        return;
-      }
-    }
     loadCandidates(page);
-  }, [searchMode, activeSearchTerm, activeFilters, page, loadCandidates]);
+  }, [page, loadCandidates]);
 
   const handleDelete = async (id: number) => {
     if (confirm(t('confirmDelete'))) {
@@ -685,7 +669,20 @@ export default function CandidateSearch() {
         {candidates.map(candidate => (
           <div
             key={candidate.id}
-            className="candidate-card"
+            style={{
+              backgroundColor: 'var(--card-bg)',
+              borderRadius: '12px',
+              padding: '24px',
+              border: '1px solid var(--border-color)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              transition: 'transform 0.15s ease-out, box-shadow 0.15s ease-out',
+              cursor: 'default'
+            }} 
+            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.06)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.03)'; }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
