@@ -202,6 +202,15 @@ export default function DataEntry() {
 
   return (
     <div className="form-layout-wrapper page-transition">
+      <div className="form-container">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+          <button type="button" className="btn btn-secondary" onClick={() => navigate(-1)}>
+            <ArrowLeft size={16} /> {t('back')}
+          </button>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, fontFamily: 'var(--font-serif)', color: 'var(--text-main)' }}>{id ? t('editProfile') : t('newProfile')}</h2>
+          <div style={{ width: '80px' }}></div>
+        </div>
+
         {/* Unsaved Draft Power-Loss Recovery Banner */}
         {hasDraft && (
           <div style={{
