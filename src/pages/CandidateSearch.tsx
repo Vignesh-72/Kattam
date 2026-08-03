@@ -66,19 +66,18 @@ export default function CandidateSearch() {
   const { t } = useLanguage();
   const PAGE_SIZE = 12;
 
-  // Asynchronously fetch distinct values STRICTLY from SQLite database
-  // Asynchronously fetch distinct values STRICTLY from SQLite database dynamically matching current selections
-  const fetchFilterOptions = useCallback(async (currentFilters?: any) => {
+  // Asynchronously fetch all distinct filter option values from SQLite database
+  const fetchFilterOptions = useCallback(async () => {
     try {
       let res = null;
       if (window.api?.db?.getSearchOptions) {
         try {
-          res = await window.api.db.getSearchOptions(currentFilters);
+          res = await window.api.db.getSearchOptions();
         } catch (_) {}
       }
       if (!res && window.api?.getSearchFilterOptions) {
         try {
-          res = await window.api.getSearchFilterOptions(currentFilters);
+          res = await window.api.getSearchFilterOptions();
         } catch (_) {}
       }
       if (res) {
@@ -106,10 +105,10 @@ export default function CandidateSearch() {
     }
   }, []);
 
-  // Dynamically re-fetch dropdown options from SQLite whenever any filter selection changes
+  // Fetch initial distinct database filter options on component mount
   useEffect(() => {
-    fetchFilterOptions(filters);
-  }, [filters, fetchFilterOptions]);
+    fetchFilterOptions();
+  }, [fetchFilterOptions]);
 
   // Options derived strictly from database queries
   const casteOptions = useMemo(() => dbOptions.castes || [], [dbOptions.castes]);
@@ -137,14 +136,11 @@ export default function CandidateSearch() {
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    const updated = {
-      ...filters,
+    setFilters(prev => ({
+      ...prev,
       [key]: value,
       ...(key === 'caste' ? { subCaste: '' } : {})
-    };
-    setFilters(updated);
-    setActiveFilters(updated);
-    setPage(1);
+    }));
   };
 
   const handleApplyFilters = (e?: React.FormEvent) => {

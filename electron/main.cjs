@@ -321,10 +321,8 @@ ipcMain.handle('db:get', (event, query, params) => {
   });
 });
 
-const fetchSearchFilterOptions = (filterState = {}) => {
+const fetchSearchFilterOptions = () => {
   return new Promise((resolve) => {
-    const filters = typeof filterState === 'string' ? { caste: filterState } : (filterState || {});
-
     const fieldMapping = {
       castes: 'caste',
       subCastes: 'subCaste',
@@ -344,43 +342,15 @@ const fetchSearchFilterOptions = (filterState = {}) => {
       maritalStatuses: 'maritalStatus'
     };
 
-    const buildQueryForField = (targetCol) => {
-      const conditions = [`${targetCol} IS NOT NULL`, `TRIM(${targetCol}) != ''` ];
-      const params = [];
-
-      Object.entries(fieldMapping).forEach(([, col]) => {
-        if (col === targetCol) return;
-        const val = filters[col] || (col === 'placeOfJob' ? filters.jobPlace : null);
-        if (val && String(val).trim().length > 0 && val !== 'All') {
-          conditions.push(`LOWER(TRIM(${col})) = LOWER(TRIM(?))`);
-          params.push(String(val).trim());
-        }
-      });
-
-      if (filters.gender && filters.gender !== 'All' && targetCol !== 'gender') {
-        conditions.push(`LOWER(TRIM(gender)) = LOWER(TRIM(?))`);
-        params.push(String(filters.gender).trim());
-      }
-      if (filters.maritalStatus && filters.maritalStatus !== 'All' && targetCol !== 'maritalStatus') {
-        conditions.push(`LOWER(TRIM(maritalStatus)) = LOWER(TRIM(?))`);
-        params.push(String(filters.maritalStatus).trim());
-      }
-
-      return {
-        sql: `SELECT DISTINCT TRIM(${targetCol}) as val FROM candidates WHERE ${conditions.join(' AND ')} ORDER BY val ASC`,
-        params
-      };
-    };
-
     const results = {};
     const keys = Object.keys(fieldMapping);
     let pending = keys.length;
 
     for (const key of keys) {
-      const targetCol = fieldMapping[key];
-      const { sql, params } = buildQueryForField(targetCol);
+      const col = fieldMapping[key];
+      const sql = `SELECT DISTINCT TRIM(${col}) as val FROM candidates WHERE ${col} IS NOT NULL AND TRIM(${col}) != '' ORDER BY val ASC`;
 
-      db.all(sql, params, (err, rows) => {
+      db.all(sql, [], (err, rows) => {
         if (!err && rows) {
           results[key] = rows.map(r => r.val).filter(v => v && String(v).trim().length > 0);
         } else {
