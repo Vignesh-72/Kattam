@@ -44,7 +44,7 @@ export default function CandidateSearch() {
   const [searchMode, setSearchMode] = useState<'standard' | 'advanced'>('standard');
   const [candidates, setCandidates] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [activeSearchTerm, setActiveSearchTerm] = useState('');
   const [filters, setFilters] = useState(initialFilterState);
   const [activeFilters, setActiveFilters] = useState(initialFilterState);
   
@@ -119,14 +119,12 @@ export default function CandidateSearch() {
   const nativityOptions = useMemo(() => dbOptions.nativities || [], [dbOptions.nativities]);
   const jobPlaceOptions = useMemo(() => dbOptions.jobPlaces || [], [dbOptions.jobPlaces]);
 
-  // Debounce for standard text search
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      setPage(1);
-    }, 400);
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
+  // Triggers search query execution ONLY when user clicks Search / presses Enter
+  const handleStandardSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setActiveSearchTerm(searchTerm);
+    setPage(1);
+  };
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
@@ -136,7 +134,8 @@ export default function CandidateSearch() {
     }));
   };
 
-  const handleApplyFilters = () => {
+  const handleApplyFilters = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setActiveFilters(filters);
     setPage(1);
   };
@@ -156,8 +155,8 @@ export default function CandidateSearch() {
     const whereConditions: string[] = [];
 
     if (searchMode === 'standard') {
-      if (debouncedSearch) {
-        const term = `%${debouncedSearch}%`;
+      if (activeSearchTerm) {
+        const term = `%${activeSearchTerm}%`;
         whereConditions.push('(registrationId LIKE ? OR fullName LIKE ? OR contactNumber LIKE ? OR caste LIKE ? OR subCaste LIKE ? OR birthPlace LIKE ? OR raasi LIKE ? OR star LIKE ? OR dob LIKE ? OR additionalInfo LIKE ?)');
         for (let i = 0; i < 10; i++) {
           countParams.push(term);
@@ -289,7 +288,7 @@ export default function CandidateSearch() {
     } catch (e) {
       console.error('[CandidateSearch] Query Execution Error:', e);
     }
-  }, [searchMode, debouncedSearch, activeFilters, page]);
+  }, [searchMode, activeSearchTerm, activeFilters, page]);
 
   useEffect(() => {
     loadCandidates();
@@ -354,29 +353,34 @@ export default function CandidateSearch() {
         </div>
       </div>
 
-      {/* Tab 1: Standard Quick Search Bar */}
+      {/* Tab 1: Standard Quick Search Bar (Executes ONLY on Enter or Search Button click) */}
       {searchMode === 'standard' && (
-        <div style={{ marginBottom: '28px', backgroundColor: 'var(--card-bg)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-          <div style={{ position: 'relative', width: '100%' }}>
-            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            <input
-              type="text"
-              className="form-control"
-              placeholder={t('searchPlaceholder') || "Search by ID, Name, Phone, Caste, Raasi..."}
-              style={{ paddingLeft: '42px', width: '100%' }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+        <form onSubmit={handleStandardSearchSubmit} style={{ marginBottom: '28px', backgroundColor: 'var(--card-bg)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ position: 'relative', flexGrow: 1 }}>
+              <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                className="form-control"
+                placeholder={t('searchPlaceholder') || "Search by ID, Name, Phone, Caste, Raasi..."}
+                style={{ paddingLeft: '42px', width: '100%' }}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <button type="submit" className="btn btn-primary" style={{ padding: '10px 24px', backgroundColor: 'var(--accent-gold)', whiteSpace: 'nowrap' }}>
+              <Search size={16} style={{ marginRight: '6px' }} /> Search
+            </button>
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-            <strong>Quick Search:</strong> Type ID, Name, Phone, Caste, Sub-Caste, Star, Raasi, or DOB.
+            <strong>Explicit Search:</strong> Press <strong>Enter</strong> or click <strong>Search</strong> to query the database.
           </div>
-        </div>
+        </form>
       )}
 
-      {/* Tab 2: Comprehensive Advanced Multi-Filter Panel */}
+      {/* Tab 2: Comprehensive Advanced Multi-Filter Panel (Executes ONLY on Apply Filters or Enter) */}
       {searchMode === 'advanced' && (
-        <div style={{ marginBottom: '28px', backgroundColor: 'var(--card-bg)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+        <form onSubmit={handleApplyFilters} style={{ marginBottom: '28px', backgroundColor: 'var(--card-bg)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
           
           {/* Section 1: Basic & Demographics */}
           <div style={{ marginBottom: '20px' }}>
@@ -637,16 +641,15 @@ export default function CandidateSearch() {
               {t('resetFilters')}
             </button>
             <button
-              type="button"
+              type="submit"
               className="btn btn-primary"
               style={{ padding: '8px 24px', backgroundColor: 'var(--accent-gold)' }}
-              onClick={handleApplyFilters}
             >
               <Filter size={15} style={{ marginRight: '6px' }} />
               {t('applyFilters')}
             </button>
           </div>
-        </div>
+        </form>
       )}
 
       {/* Candidate Card Results Grid */}
