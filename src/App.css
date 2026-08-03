@@ -81,20 +81,30 @@ h1, h2, h3, h4, .app-title {
   line-height: 1.2;
 }
 
-/* Hide scrollbars */
+/* Sleek, visible custom scrollbars */
 ::-webkit-scrollbar {
-  display: none;
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(184, 134, 11, 0.4);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-gold);
 }
 * {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(184, 134, 11, 0.4) var(--bg-color);
 }
 
 .app-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow-y: auto;
+  min-height: 100vh;
 }
 
 .top-navbar {
@@ -186,14 +196,14 @@ h1, h2, h3, h4, .app-title {
 
 .main-content {
   flex-grow: 1;
-  padding: var(--space-4) var(--space-6); /* CSS-02: reduced from 48px/64px — was eating 128px at 1024px */
+  padding: var(--space-4) var(--space-6) 80px var(--space-6);
   background-color: transparent;
   animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* CSS-02: Further reduce padding at exactly the 1024px target resolution */
 @media (max-width: 1100px) {
-  .main-content { padding: var(--space-3) var(--space-4); } /* 24px / 32px */
+  .main-content { padding: var(--space-3) var(--space-4) 80px var(--space-4); }
 }
 
 
