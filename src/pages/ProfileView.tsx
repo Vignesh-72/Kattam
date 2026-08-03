@@ -9,6 +9,7 @@ export default function ProfileView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [candidate, setCandidate] = useState<any>(null);
+  const [selectedCompany, setSelectedCompany] = useState<'company1' | 'company2'>('company1');
   const { t } = useLanguage();
   
   useEffect(() => {
@@ -40,11 +41,13 @@ export default function ProfileView() {
     window.print();
   };
 
-  const handleExportPDF = async () => {
+  const handleExportPDF = async (company: 'company1' | 'company2' = 'company1') => {
+    setSelectedCompany(company);
     const originalScroll = window.scrollY;
     try {
       // Scroll to top to prevent html2canvas out-of-viewport clipping bug
       window.scrollTo(0, 0);
+      await new Promise(resolve => setTimeout(resolve, 60));
 
       const page1 = document.getElementById('print-page-1');
       if (!page1) return;
@@ -78,7 +81,8 @@ export default function ProfileView() {
       canvas.height = 0;
       canvas = null;
       
-      pdf.save(`${candidate.fullName}_Profile.pdf`);
+      const companyTag = company === 'company1' ? 'Kattam' : 'Thirumanam';
+      pdf.save(`${candidate.fullName}_${companyTag}_Profile.pdf`);
     } catch (err) {
       console.error('[ProfileView] PDF Export Error:', err);
       alert('Could not export PDF. Please check system memory and try again.');
@@ -119,7 +123,8 @@ export default function ProfileView() {
         <button className="btn btn-secondary" onClick={() => navigate(-1)}><ArrowLeft size={16} /> {t('back')}</button>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn btn-primary" onClick={handlePrint}><Printer size={16} /> {t('printProfile')}</button>
-          <button className="btn btn-primary" onClick={handleExportPDF}><Download size={16} /> {t('exportPdf')}</button>
+          <button className="btn btn-primary" onClick={() => handleExportPDF('company1')}><Download size={16} /> {t('exportPdfCompany1') || 'PDF (Kattam)'}</button>
+          <button className="btn btn-secondary" onClick={() => handleExportPDF('company2')}><Download size={16} /> {t('exportPdfCompany2') || 'PDF (Thirumanam)'}</button>
         </div>
       </div>
       
@@ -128,9 +133,16 @@ export default function ProfileView() {
           {/* Header - Logo Top Left */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000', paddingBottom: '10px', marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <img src="/images/logo_transparent.png" alt="Logo" style={{ height: '54px', objectFit: 'contain' }} className="print-logo" />
+              <img 
+                src={selectedCompany === 'company1' ? '/images/logo_transparent.png' : '/images/logotrans.png'} 
+                alt="Logo" 
+                style={{ height: '54px', objectFit: 'contain' }} 
+                className="print-logo" 
+              />
               <div>
-                <h1 style={{ fontSize: '18px', margin: '0', color: '#000', lineHeight: 1.2 }}>{t('kattamMatrimony')}</h1>
+                <h1 style={{ fontSize: '18px', margin: '0', color: '#000', lineHeight: 1.2 }}>
+                  {selectedCompany === 'company1' ? (t('company1Name') || 'Kattam Matrimony') : (t('company2Name') || 'Thirumanam Matrimony')}
+                </h1>
                 <h2 style={{ fontSize: '12px', margin: '2px 0 0 0', color: '#444', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('candidateProfile')}</h2>
               </div>
             </div>
@@ -167,20 +179,20 @@ export default function ProfileView() {
         </div>
         
         {/* Detail Sections */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '10px', fontSize: '11.5px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', fontSize: '12px' }}>
           <div>
-            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '4px', fontSize: '12.5px' }}>{t('familyDetails')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '6px', fontSize: '13px' }}>{t('familyDetails')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div><strong>{t('fatherName')}:</strong> {candidate.fatherName} ({candidate.fatherJob})</div>
               <div><strong>{t('motherName')}:</strong> {candidate.motherName} ({candidate.motherJob})</div>
-              <div><strong>{t('brothers') || 'Brothers'}:</strong> {extraData.brothers} ({extraData.brothersMarried} m)</div>
-              <div><strong>{t('sisters') || 'Sisters'}:</strong> {extraData.sisters} ({extraData.sistersMarried} m)</div>
+              <div><strong>{t('brothers') || 'Brothers'}:</strong> {extraData.brothers || '0'} ({extraData.brothersMarried || '0'} m)</div>
+              <div><strong>{t('sisters') || 'Sisters'}:</strong> {extraData.sisters || '0'} ({extraData.sistersMarried || '0'} m)</div>
               <div><strong>{t('nativity')}:</strong> {candidate.nativity}</div>
             </div>
           </div>
           <div>
-            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '4px', fontSize: '12.5px' }}>{t('physicalEducation')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '6px', fontSize: '13px' }}>{t('physicalEducation')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div><strong>{t('qualification')}:</strong> {candidate.qualification}</div>
               <div><strong>{t('occupation')}:</strong> {candidate.occupation}</div>
               <div><strong>{t('income')}:</strong> {candidate.income}</div>
@@ -192,22 +204,19 @@ export default function ProfileView() {
           </div>
         </div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '10px', fontSize: '11.5px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', fontSize: '12px' }}>
           <div>
-            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '4px', fontSize: '12.5px' }}>{t('astrologicalDetails')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-              <div><strong>{t('caste')}:</strong> {candidate.caste}</div>
-              <div><strong>{t('subCaste')}:</strong> {candidate.subCaste}</div>
-              <div><strong>{t('star')}:</strong> {candidate.star}</div>
-              <div><strong>{t('raasi')}:</strong> {candidate.raasi}</div>
-              <div><strong>லக்னம் (Laknam):</strong> {candidate.laknam}</div>
-              <div><strong>{t('gothram')}:</strong> {candidate.gothram}</div>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '6px', fontSize: '13px' }}>{t('astrologicalDetails')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div><strong>{t('caste')}:</strong> {candidate.caste} | <strong>{t('subCaste')}:</strong> {candidate.subCaste}</div>
+              <div><strong>{t('star')}:</strong> {candidate.star} | <strong>{t('raasi')}:</strong> {candidate.raasi}</div>
+              <div><strong>லக்னம் (Laknam):</strong> {candidate.laknam} | <strong>{t('gothram')}:</strong> {candidate.gothram}</div>
               <div><strong>{t('dasaBalance') || 'Dasa Balance'}:</strong> {candidate.horoscopeBalance}</div>
             </div>
           </div>
           <div>
-            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '4px', fontSize: '12.5px' }}>{t('communicationDetails')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '6px', fontSize: '13px' }}>{t('communicationDetails')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div><strong>{t('contactPerson')}:</strong> {candidate.contactPerson} ({candidate.contactNumber})</div>
               <div><strong>{t('address')}:</strong> {candidate.presentAddress}</div>
               <div><strong>{t('expectation') || 'Expectations'}:</strong> {candidate.partnerComments}</div>
