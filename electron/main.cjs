@@ -245,15 +245,15 @@ ipcMain.handle('db:get', (event, query, params) => {
   });
 });
 
-ipcMain.handle('db:getSearchOptions', async () => {
+const fetchSearchFilterOptions = () => {
   return new Promise((resolve) => {
     const queries = {
-      castes: "SELECT DISTINCT caste FROM candidates WHERE caste IS NOT NULL AND caste != '' ORDER BY caste ASC",
-      subCastes: "SELECT DISTINCT subCaste FROM candidates WHERE subCaste IS NOT NULL AND subCaste != '' ORDER BY subCaste ASC",
-      stars: "SELECT DISTINCT star FROM candidates WHERE star IS NOT NULL AND star != '' ORDER BY star ASC",
-      raasis: "SELECT DISTINCT raasi FROM candidates WHERE raasi IS NOT NULL AND raasi != '' ORDER BY raasi ASC",
-      qualifications: "SELECT DISTINCT qualification FROM candidates WHERE qualification IS NOT NULL AND qualification != '' ORDER BY qualification ASC",
-      occupations: "SELECT DISTINCT occupation FROM candidates WHERE occupation IS NOT NULL AND occupation != '' ORDER BY occupation ASC"
+      castes: "SELECT DISTINCT caste FROM candidates WHERE caste IS NOT NULL AND TRIM(caste) != '' ORDER BY caste ASC",
+      subCastes: "SELECT DISTINCT subCaste FROM candidates WHERE subCaste IS NOT NULL AND TRIM(subCaste) != '' ORDER BY subCaste ASC",
+      stars: "SELECT DISTINCT star FROM candidates WHERE star IS NOT NULL AND TRIM(star) != '' ORDER BY star ASC",
+      raasis: "SELECT DISTINCT raasi FROM candidates WHERE raasi IS NOT NULL AND TRIM(raasi) != '' ORDER BY raasi ASC",
+      qualifications: "SELECT DISTINCT qualification FROM candidates WHERE qualification IS NOT NULL AND TRIM(qualification) != '' ORDER BY qualification ASC",
+      occupations: "SELECT DISTINCT occupation FROM candidates WHERE occupation IS NOT NULL AND TRIM(occupation) != '' ORDER BY occupation ASC"
     };
 
     const results = {};
@@ -263,7 +263,7 @@ ipcMain.handle('db:getSearchOptions', async () => {
     for (const key of keys) {
       db.all(queries[key], [], (err, rows) => {
         if (!err && rows) {
-          results[key] = rows.map(r => Object.values(r)[0]).filter(Boolean);
+          results[key] = rows.map(r => Object.values(r)[0]).filter(v => v && String(v).trim().length > 0);
         } else {
           results[key] = [];
         }
@@ -272,7 +272,10 @@ ipcMain.handle('db:getSearchOptions', async () => {
       });
     }
   });
-});
+};
+
+ipcMain.handle('db:getSearchOptions', fetchSearchFilterOptions);
+ipcMain.handle('get-search-filter-options', fetchSearchFilterOptions);
 
 // ─── IPC: MEM-01 Fix — Async image save (replaces blocking writeFileSync) ────
 ipcMain.handle('save-image', async (event, { data, fileName }) => {

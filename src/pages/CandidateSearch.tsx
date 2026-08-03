@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Edit, Eye, Trash2, ChevronLeft, ChevronRight, Filter, RefreshCw, Layers } from 'lucide-react';
+import { Search, Edit, Eye, Trash2, ChevronLeft, ChevronRight, Filter, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 
 interface SearchOptions {
@@ -11,6 +11,17 @@ interface SearchOptions {
   qualifications: string[];
   occupations: string[];
 }
+
+const FALLBACK_STARS = [
+  "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha",
+  "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshta",
+  "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
+];
+
+const FALLBACK_RAASIS = [
+  "Mesham", "Rishabham", "Mithunam", "Kadagam", "Simmam", "Kanni",
+  "Thulaam", "Viruchigam", "Dhanusu", "Makaramm", "Kumbam", "Meenam"
+];
 
 const initialFilterState = {
   gender: '',
@@ -32,7 +43,8 @@ export default function CandidateSearch() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filters, setFilters] = useState(initialFilterState);
   const [activeFilters, setActiveFilters] = useState(initialFilterState);
-  const [options, setOptions] = useState<SearchOptions>({
+  
+  const [dbOptions, setDbOptions] = useState<SearchOptions>({
     castes: [], subCastes: [], stars: [], raasis: [], qualifications: [], occupations: []
   });
   
@@ -43,20 +55,35 @@ export default function CandidateSearch() {
   const { t } = useLanguage();
   const PAGE_SIZE = 30;
 
-  // Load distinct filter dropdown options once on initialization
+  // Asynchronously fetch distinct values from SQLite database on mount
   useEffect(() => {
-    async function fetchOptions() {
+    let isMounted = true;
+    async function fetchFilterOptions() {
       try {
-        if (window.api?.db?.getSearchOptions) {
-          const res = await window.api.db.getSearchOptions();
-          if (res) setOptions(res);
+        let res = null;
+        if (window.api?.getSearchFilterOptions) {
+          res = await window.api.getSearchFilterOptions();
+        } else if (window.api?.db?.getSearchOptions) {
+          res = await window.api.db.getSearchOptions();
+        }
+        if (isMounted && res) {
+          setDbOptions(res);
         }
       } catch (err) {
-        console.error('[CandidateSearch] Failed to fetch filter options:', err);
+        console.error('[CandidateSearch] Error fetching distinct filter options:', err);
       }
     }
-    fetchOptions();
+    fetchFilterOptions();
+    return () => { isMounted = false; };
   }, []);
+
+  // Memoized options with fallback for Stars/Raasis if DB is fresh
+  const casteOptions = useMemo(() => dbOptions.castes || [], [dbOptions.castes]);
+  const subCasteOptions = useMemo(() => dbOptions.subCastes || [], [dbOptions.subCastes]);
+  const starOptions = useMemo(() => (dbOptions.stars && dbOptions.stars.length > 0 ? dbOptions.stars : FALLBACK_STARS), [dbOptions.stars]);
+  const raasiOptions = useMemo(() => (dbOptions.raasis && dbOptions.raasis.length > 0 ? dbOptions.raasis : FALLBACK_RAASIS), [dbOptions.raasis]);
+  const qualificationOptions = useMemo(() => dbOptions.qualifications || [], [dbOptions.qualifications]);
+  const occupationOptions = useMemo(() => dbOptions.occupations || [], [dbOptions.occupations]);
 
   // Debounce for standard text search
   useEffect(() => {
@@ -68,7 +95,12 @@ export default function CandidateSearch() {
   }, [searchTerm]);
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters(prev => ({
+      ...prev,
+      [key]: value,
+      // Reset dependent subCaste if caste is cleared
+      ...(key === 'caste' && !value ? { subCaste: '' } : {})
+    }));
   };
 
   const handleApplyFilters = () => {
@@ -272,39 +304,47 @@ export default function CandidateSearch() {
               </select>
             </div>
 
-            {/* Caste */}
+            {/* Caste - Dynamically Populated from DB */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('caste')}</label>
               <select className="form-control" value={filters.caste} onChange={e => handleFilterChange('caste', e.target.value)}>
                 <option value="">{t('allCastes')}</option>
-                {options.castes.map(c => <option key={c} value={c}>{c}</option>)}
+                {casteOptions.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
               </select>
             </div>
 
-            {/* Sub Caste */}
+            {/* Sub Caste - Dynamically Populated from DB */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('subCaste')}</label>
               <select className="form-control" value={filters.subCaste} onChange={e => handleFilterChange('subCaste', e.target.value)}>
                 <option value="">{t('allSubCastes')}</option>
-                {options.subCastes.map(sc => <option key={sc} value={sc}>{sc}</option>)}
+                {subCasteOptions.map(sc => (
+                  <option key={sc} value={sc}>{sc}</option>
+                ))}
               </select>
             </div>
 
-            {/* Star */}
+            {/* Star - Dynamically Populated from DB */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('star')}</label>
               <select className="form-control" value={filters.star} onChange={e => handleFilterChange('star', e.target.value)}>
                 <option value="">{t('allStars')}</option>
-                {options.stars.map(s => <option key={s} value={s}>{s}</option>)}
+                {starOptions.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
               </select>
             </div>
 
-            {/* Raasi */}
+            {/* Raasi - Dynamically Populated from DB */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('raasi')}</label>
               <select className="form-control" value={filters.raasi} onChange={e => handleFilterChange('raasi', e.target.value)}>
                 <option value="">{t('allRaasis')}</option>
-                {options.raasis.map(r => <option key={r} value={r}>{r}</option>)}
+                {raasiOptions.map(r => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
               </select>
             </div>
 
@@ -320,21 +360,25 @@ export default function CandidateSearch() {
               </select>
             </div>
 
-            {/* Qualification */}
+            {/* Qualification - Dynamically Populated from DB */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('qualification')}</label>
               <select className="form-control" value={filters.qualification} onChange={e => handleFilterChange('qualification', e.target.value)}>
                 <option value="">{t('allQualifications')}</option>
-                {options.qualifications.map(q => <option key={q} value={q}>{q}</option>)}
+                {qualificationOptions.map(q => (
+                  <option key={q} value={q}>{q}</option>
+                ))}
               </select>
             </div>
 
-            {/* Occupation */}
+            {/* Occupation - Dynamically Populated from DB */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('occupation')}</label>
               <select className="form-control" value={filters.occupation} onChange={e => handleFilterChange('occupation', e.target.value)}>
                 <option value="">{t('allOccupations')}</option>
-                {options.occupations.map(o => <option key={o} value={o}>{o}</option>)}
+                {occupationOptions.map(o => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
               </select>
             </div>
 
