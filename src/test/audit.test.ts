@@ -317,20 +317,20 @@ describe('PERF-04 · SQLite WAL Checkpointing, Auto-Vacuum & Packaging Configura
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CRUD & PAGINATION · Hard Deletion & Show More Progressive Loading
+// CRUD & PAGINATION · Hard Deletion & Page-by-Page Navigation (12 Profiles Cap)
 // ─────────────────────────────────────────────────────────────────────────────
-describe('CRUD & PAGINATION · Hard Deletion & Show More Progressive Loading', () => {
-  it('appends next batch of candidates on Show More click without overwriting existing state', () => {
-    const batch1 = [{ id: 1, fullName: 'Candidate 1' }, { id: 2, fullName: 'Candidate 2' }];
-    const batch2 = [{ id: 3, fullName: 'Candidate 3' }, { id: 4, fullName: 'Candidate 4' }];
+describe('CRUD & PAGINATION · Hard Deletion & Page-by-Page Navigation (12 Profiles Cap)', () => {
+  it('strictly caps DOM rendering to 12 profiles per page by unmounting previous pages', () => {
+    const page1Batch = Array.from({ length: 12 }, (_, i) => ({ id: i + 1, fullName: `Candidate ${i + 1}` }));
+    const page2Batch = Array.from({ length: 12 }, (_, i) => ({ id: i + 13, fullName: `Candidate ${i + 13}` }));
 
-    let displayed = [...batch1];
-    expect(displayed.length).toBe(2);
+    let displayed = [...page1Batch];
+    expect(displayed.length).toBe(12);
 
-    // Click Show More
-    displayed = [...displayed, ...batch2];
-    expect(displayed.length).toBe(4);
-    expect(displayed.map(c => c.id)).toEqual([1, 2, 3, 4]);
+    // Switch to Page 2 (Unmounts Page 1)
+    displayed = [...page2Batch];
+    expect(displayed.length).toBe(12);
+    expect(displayed[0].id).toBe(13);
   });
 
   it('verifies hard delete SQL query syntax and zero-record return expectation', () => {

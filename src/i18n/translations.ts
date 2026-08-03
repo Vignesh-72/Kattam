@@ -101,6 +101,10 @@ export const translations = {
     educationCareer: "Education & Career",
     showMore: "Show More Profiles",
     loadingMore: "Loading More Profiles...",
+    firstPage: "First",
+    lastPage: "Last",
+    previousPage: "Previous",
+    nextPage: "Next",
 
     // Profile & Family
     candidateProfile: "Candidate Profile",
@@ -247,6 +251,10 @@ export const translations = {
     educationCareer: "கல்வி & வேலை",
     showMore: "மேலும் வரன்களைக் காட்டு",
     loadingMore: "மேலும் வரன்கள் ஏற்றப்படுகின்றன...",
+    firstPage: "முதல்",
+    lastPage: "கடைசி",
+    previousPage: "முந்தைய",
+    nextPage: "அடுத்த",
 
     // Profile & Family
     candidateProfile: "வரன் விவரங்கள்",

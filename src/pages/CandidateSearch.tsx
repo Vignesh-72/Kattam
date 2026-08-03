@@ -60,10 +60,10 @@ export default function CandidateSearch() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const PAGE_SIZE = 30;
+  const PAGE_SIZE = 12;
 
   // Asynchronously fetch distinct values STRICTLY from SQLite database
   const fetchFilterOptions = useCallback(async (selectedCaste?: string) => {
@@ -157,7 +157,7 @@ export default function CandidateSearch() {
     setPage(1);
   };
 
-  const loadCandidates = useCallback(async (targetPage: number, isAppend: boolean) => {
+  const loadCandidates = useCallback(async (targetPage: number) => {
     const CARD_COLS = 'id, registrationId, fullName, gender, caste, contactNumber';
     let countQuery = 'SELECT COUNT(*) as count FROM candidates';
     let dataQuery = `SELECT ${CARD_COLS} FROM candidates`;
@@ -287,29 +287,25 @@ export default function CandidateSearch() {
 
     try {
       if (window.api?.db?.get) {
-        setLoadingMore(true);
+        setLoading(true);
         const countResult = await window.api.db.get(countQuery, countParams);
         const total = countResult ? countResult.count : 0;
         setTotalCount(total);
         setTotalPages(Math.max(1, Math.ceil(total / PAGE_SIZE)));
 
         const rows = (await window.api.db.all(dataQuery, dataParams)) || [];
-        setCandidates(prev => isAppend ? [...prev, ...rows] : rows);
+        setCandidates(rows);
       }
     } catch (e) {
       console.error('[CandidateSearch] Query Execution Error:', e);
     } finally {
-      setLoadingMore(false);
+      setLoading(false);
     }
   }, [searchMode, activeSearchTerm, activeFilters]);
 
   useEffect(() => {
-    loadCandidates(page, page > 1);
+    loadCandidates(page);
   }, [searchMode, activeSearchTerm, activeFilters, page, loadCandidates]);
-
-  const handleShowMore = () => {
-    setPage(p => p + 1);
-  };
 
   const handleDelete = async (id: number) => {
     if (confirm(t('confirmDelete'))) {
@@ -319,7 +315,7 @@ export default function CandidateSearch() {
         await window.api.db.run('DELETE FROM candidates WHERE id = ?', [id]);
       }
       setPage(1);
-      loadCandidates(1, false);
+      loadCandidates(1);
       fetchFilterOptions(filters.caste);
     }
   };
@@ -693,37 +689,91 @@ export default function CandidateSearch() {
         )}
       </div>
 
-      {/* Progressive "Show More" Load Control */}
-      {candidates.length < totalCount && (
-        <div style={{ textAlign: 'center', marginTop: '36px', marginBottom: '40px' }}>
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={loadingMore}
-            onClick={handleShowMore}
-            style={{
-              padding: '14px 36px',
-              fontSize: '1rem',
-              fontWeight: 600,
-              borderRadius: '10px',
-              boxShadow: '0 4px 12px rgba(122, 46, 46, 0.2)',
+      {/* ─── Page-Style Navigation Control (Strict 12 Profiles/Page Limit) ───────── */}
+      {totalCount > 0 && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: '32px',
+          marginBottom: '40px',
+          paddingTop: '20px',
+          borderTop: '1px solid var(--border-color)',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          {/* Record Count Summary */}
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.92rem', fontWeight: 500 }}>
+            {((page - 1) * PAGE_SIZE) + 1} - {Math.min(page * PAGE_SIZE, totalCount)} / {totalCount}
+          </div>
+
+          {/* Navigation Controls */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* First Page Button */}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={page === 1 || loading}
+              onClick={() => setPage(1)}
+              style={{ padding: '8px 14px', fontSize: '0.85rem', fontWeight: 600, opacity: page === 1 ? 0.5 : 1 }}
+              title={t('firstPage')}
+            >
+              « {t('firstPage')}
+            </button>
+
+            {/* Previous Page Button */}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={page === 1 || loading}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              style={{ padding: '8px 14px', fontSize: '0.85rem', fontWeight: 600, opacity: page === 1 ? 0.5 : 1 }}
+              title={t('previousPage')}
+            >
+              <ChevronLeft size={16} style={{ marginRight: '4px' }} />
+              {t('previousPage')}
+            </button>
+
+            {/* Page Number Indicator Badge */}
+            <div style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '10px'
-            }}
-          >
-            {loadingMore ? (
-              <>
-                <RefreshCw size={18} className="spin-animation" style={{ animation: 'spin 1s linear infinite' }} />
-                {t('loadingMore')}
-              </>
-            ) : (
-              <>
-                <RefreshCw size={18} />
-                {t('showMore')} ({candidates.length} / {totalCount})
-              </>
-            )}
-          </button>
+              backgroundColor: 'rgba(122, 46, 46, 0.08)',
+              color: 'var(--primary-color)',
+              padding: '6px 16px',
+              borderRadius: '8px',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              border: '1px solid rgba(122, 46, 46, 0.2)'
+            }}>
+              {t('page')} {page} / {totalPages}
+            </div>
+
+            {/* Next Page Button */}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={page >= totalPages || loading}
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              style={{ padding: '8px 14px', fontSize: '0.85rem', fontWeight: 600, opacity: page >= totalPages ? 0.5 : 1 }}
+              title={t('nextPage')}
+            >
+              {t('nextPage')}
+              <ChevronRight size={16} style={{ marginLeft: '4px' }} />
+            </button>
+
+            {/* Last Page Button */}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={page >= totalPages || loading}
+              onClick={() => setPage(totalPages)}
+              style={{ padding: '8px 14px', fontSize: '0.85rem', fontWeight: 600, opacity: page >= totalPages ? 0.5 : 1 }}
+              title={t('lastPage')}
+            >
+              {t('lastPage')} »
+            </button>
+          </div>
         </div>
       )}
     </div>
