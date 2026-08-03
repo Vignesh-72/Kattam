@@ -435,7 +435,7 @@ export default function DataEntry() {
           
           <div className="form-section" style={{ marginTop: 'var(--space-6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--card-bg)', padding: '20px 24px', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
             <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-              {id ? 'Ready to apply changes to this profile?' : 'Ready to save this new profile to the database?'}
+              {id ? 'Ready to apply changes to this profile?' : 'Ready to save this new profile?'}
             </div>
             <button type="button" className="btn btn-primary" onClick={handleSave} style={{ minWidth: '180px', padding: '12px 24px', fontSize: '1rem', fontWeight: 600 }}>
               <Save size={18} /> {t('saveProfile')}

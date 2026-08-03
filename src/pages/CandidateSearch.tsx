@@ -383,7 +383,7 @@ export default function CandidateSearch() {
             </button>
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '8px' }}>
-            <strong>Explicit Search:</strong> Press <strong>Enter</strong> or click <strong>Search</strong> to query the database.
+            Press <strong>Enter</strong> or click <strong>Search</strong> to search profiles.
           </div>
         </form>
       )}
