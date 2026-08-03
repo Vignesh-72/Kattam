@@ -286,13 +286,14 @@ export default function CandidateSearch() {
     try {
       if (window.api?.db?.get) {
         setLoading(true);
-        const countResult = await window.api.db.get(countQuery, countParams);
+        const [countResult, rows] = await Promise.all([
+          window.api.db.get(countQuery, countParams),
+          window.api.db.all(dataQuery, dataParams)
+        ]);
         const total = countResult ? countResult.count : 0;
         setTotalCount(total);
         setTotalPages(Math.max(1, Math.ceil(total / PAGE_SIZE)));
-
-        const rows = (await window.api.db.all(dataQuery, dataParams)) || [];
-        setCandidates(rows);
+        setCandidates(rows || []);
       }
     } catch (e) {
       console.error('[CandidateSearch] Query Execution Error:', e);
