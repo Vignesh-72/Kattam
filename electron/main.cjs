@@ -176,9 +176,16 @@ function initDB() {
       db.run('CREATE INDEX IF NOT EXISTS idx_regid ON candidates(registrationId)');
       db.run('CREATE INDEX IF NOT EXISTS idx_caste ON candidates(caste)');
       db.run('CREATE INDEX IF NOT EXISTS idx_subcaste ON candidates(subCaste)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_caste_subcaste ON candidates(caste, subCaste)');
       db.run('CREATE INDEX IF NOT EXISTS idx_gender ON candidates(gender)');
       db.run('CREATE INDEX IF NOT EXISTS idx_star ON candidates(star)');
       db.run('CREATE INDEX IF NOT EXISTS idx_raasi ON candidates(raasi)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_gothram ON candidates(gothram)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_laknam ON candidates(laknam)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_religion ON candidates(religion)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_mothertongue ON candidates(motherTongue)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_nativity ON candidates(nativity)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_placeofjob ON candidates(placeOfJob)');
       db.run('CREATE INDEX IF NOT EXISTS idx_marital ON candidates(maritalStatus)');
       db.run('CREATE INDEX IF NOT EXISTS idx_created ON candidates(createdAt)');
       // Composite index for common matrimonial search queries
