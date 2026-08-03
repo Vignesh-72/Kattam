@@ -142,18 +142,18 @@ export default function ProfileView() {
       
       <div id="print-area" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
         <div id="print-page-1" style={{ backgroundColor: 'white', padding: '32px', color: '#2d3748' }}>
+          {/* Top Left (Reg No) & Top Right (Reg Date) Header Bar for Page 1 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #cbd5e0', paddingBottom: '6px', marginBottom: '16px', fontSize: '13px', fontWeight: 'bold', color: '#2d3748' }}>
+            <div>{t('regNo')}: {candidate.registrationId || `TMM-${candidate.id}`}</div>
+            <div>{t('regDate')}: {extraData.regDate || candidate.createdAt?.split(' ')[0]}</div>
+          </div>
+
           {/* Header */}
           <div style={{ textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '12px', marginBottom: '16px' }}>
             <img src="/images/logo_transparent.png" alt="Logo" style={{ height: '60px', marginBottom: '8px' }} className="print-logo" />
             <h1 style={{ fontSize: '20px', margin: '0 0 4px 0', color: '#000' }}>{t('kattamMatrimony')}</h1>
             <h2 style={{ fontSize: '14px', margin: 0, color: '#444', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('candidateProfile')}</h2>
           </div>
-        
-        {/* Core Info */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '12px', fontWeight: 'bold', color: '#555' }}>
-          <div>{t('regNo')}: {candidate.registrationId || `TMM-${candidate.id}`}</div>
-          <div>{t('regDate') || 'Reg Date'}: {extraData.regDate || candidate.createdAt?.split(' ')[0]}</div>
-        </div>
         
         <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
           {candidate.photo1 && (
@@ -202,7 +202,8 @@ export default function ProfileView() {
               <div><strong>{t('workLocation') || 'Work Location'}:</strong> {candidate.placeOfJob}</div>
               <div><strong>{t('assets') || 'Assets'}:</strong> {candidate.assets}</div>
               <div><strong>{t('height')}:</strong> {candidate.height} <strong>{t('weight')}:</strong> {candidate.weight}</div>
-              <div><strong>{t('diet')}:</strong> {candidate.diet} <strong>{t('complexion')}:</strong> {candidate.complexion}</div>
+              <div><strong>{t('diet')}:</strong> {candidate.diet}</div>
+              <div><strong>{t('complexion')}:</strong> {candidate.complexion}</div>
             </div>
           </div>
         </div>
@@ -236,6 +237,12 @@ export default function ProfileView() {
         {/* Visual separator for UI, acts as page break for print */}
         <div className="no-print" style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '0 32px' }}></div>
         <div id="print-page-2" className="print-page-break" style={{ backgroundColor: 'white', padding: '32px', color: '#2d3748' }}>
+          {/* Top Left (Reg No) & Top Right (Reg Date) Header Bar for Page 2 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #cbd5e0', paddingBottom: '6px', marginBottom: '16px', fontSize: '13px', fontWeight: 'bold', color: '#2d3748' }}>
+            <div>{t('regNo')}: {candidate.registrationId || `TMM-${candidate.id}`}</div>
+            <div>{t('regDate')}: {extraData.regDate || candidate.createdAt?.split(' ')[0]}</div>
+          </div>
+
           <h3 style={{ borderBottom: '2px solid #000', paddingBottom: '8px', marginBottom: '16px', color: '#000', fontSize: '16px' }}>{t('horoscopeCharts') || 'Horoscope Charts (Kattam)'}</h3>
           {chartDataError ? (
             <div style={{ padding: '24px', backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: '8px', color: '#856404' }}>
