@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('api', {
     run: (query, params) => ipcRenderer.invoke('db:run', query, params),
     all: (query, params) => ipcRenderer.invoke('db:all', query, params),
     get: (query, params) => ipcRenderer.invoke('db:get', query, params),
+    getSearchOptions: () => ipcRenderer.invoke('db:getSearchOptions'),
   },
   // Legacy: kept for compatibility. Prefer pickAndSaveImage for new photo uploads.
   saveImage: (data, fileName) => ipcRenderer.invoke('save-image', { data, fileName }),

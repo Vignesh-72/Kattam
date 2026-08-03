@@ -1,12 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Edit, Eye, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Edit, Eye, Trash2, ChevronLeft, ChevronRight, Filter, RefreshCw, Layers } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 
+interface SearchOptions {
+  castes: string[];
+  subCastes: string[];
+  stars: string[];
+  raasis: string[];
+  qualifications: string[];
+  occupations: string[];
+}
+
+const initialFilterState = {
+  gender: '',
+  caste: '',
+  subCaste: '',
+  star: '',
+  raasi: '',
+  maritalStatus: '',
+  qualification: '',
+  occupation: '',
+  minAge: '',
+  maxAge: '',
+};
+
 export default function CandidateSearch() {
+  const [searchMode, setSearchMode] = useState<'standard' | 'advanced'>('standard');
   const [candidates, setCandidates] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [filters, setFilters] = useState(initialFilterState);
+  const [activeFilters, setActiveFilters] = useState(initialFilterState);
+  const [options, setOptions] = useState<SearchOptions>({
+    castes: [], subCastes: [], stars: [], raasis: [], qualifications: [], occupations: []
+  });
+  
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -14,51 +43,143 @@ export default function CandidateSearch() {
   const { t } = useLanguage();
   const PAGE_SIZE = 30;
 
+  // Load distinct filter dropdown options once on initialization
+  useEffect(() => {
+    async function fetchOptions() {
+      try {
+        if (window.api?.db?.getSearchOptions) {
+          const res = await window.api.db.getSearchOptions();
+          if (res) setOptions(res);
+        }
+      } catch (err) {
+        console.error('[CandidateSearch] Failed to fetch filter options:', err);
+      }
+    }
+    fetchOptions();
+  }, []);
+
+  // Debounce for standard text search
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
-      setPage(1); // Reset to first page on new search
+      setPage(1);
     }, 400);
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  const loadCandidates = async () => {
-    // MEM-04: SELECT * was loading 50+ columns including large rasiKattam/amsamKattam
-    // JSON blobs for cards that only display 5 fields. Now fetches only what's needed.
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleApplyFilters = () => {
+    setActiveFilters(filters);
+    setPage(1);
+  };
+
+  const handleResetFilters = () => {
+    setFilters(initialFilterState);
+    setActiveFilters(initialFilterState);
+    setPage(1);
+  };
+
+  const loadCandidates = useCallback(async () => {
     const CARD_COLS = 'id, registrationId, fullName, gender, caste, contactNumber';
     let countQuery = 'SELECT COUNT(*) as count FROM candidates';
-    let dataQuery = `SELECT ${CARD_COLS} FROM candidates ORDER BY createdAt DESC LIMIT ? OFFSET ?`;
-    let countParams: any[] = [];
-    let dataParams: any[] = [];
+    let dataQuery = `SELECT ${CARD_COLS} FROM candidates`;
+    const countParams: any[] = [];
+    const dataParams: any[] = [];
+    const whereConditions: string[] = [];
 
-    if (debouncedSearch) {
-      const term = `%${debouncedSearch}%`;
-      const whereClause = ` WHERE registrationId LIKE ? OR fullName LIKE ? OR contactNumber LIKE ? OR caste LIKE ? OR subCaste LIKE ? OR birthPlace LIKE ? OR raasi LIKE ? OR star LIKE ? OR dob LIKE ? OR additionalInfo LIKE ?`;
-      countQuery += whereClause;
-      dataQuery = `SELECT ${CARD_COLS} FROM candidates ${whereClause} ORDER BY createdAt DESC LIMIT ? OFFSET ?`;
-      const searchParams = Array(10).fill(term);
-      countParams = [...searchParams];
-      dataParams = [...searchParams];
+    if (searchMode === 'standard') {
+      if (debouncedSearch) {
+        const term = `%${debouncedSearch}%`;
+        whereConditions.push('(registrationId LIKE ? OR fullName LIKE ? OR contactNumber LIKE ? OR caste LIKE ? OR subCaste LIKE ? OR birthPlace LIKE ? OR raasi LIKE ? OR star LIKE ? OR dob LIKE ? OR additionalInfo LIKE ?)');
+        for (let i = 0; i < 10; i++) {
+          countParams.push(term);
+          dataParams.push(term);
+        }
+      }
+    } else {
+      // Advanced Multi-Criteria Filter Query Builder
+      if (activeFilters.gender) {
+        whereConditions.push('LOWER(gender) = LOWER(?)');
+        countParams.push(activeFilters.gender);
+        dataParams.push(activeFilters.gender);
+      }
+      if (activeFilters.caste) {
+        whereConditions.push('caste = ?');
+        countParams.push(activeFilters.caste);
+        dataParams.push(activeFilters.caste);
+      }
+      if (activeFilters.subCaste) {
+        whereConditions.push('subCaste = ?');
+        countParams.push(activeFilters.subCaste);
+        dataParams.push(activeFilters.subCaste);
+      }
+      if (activeFilters.star) {
+        whereConditions.push('star = ?');
+        countParams.push(activeFilters.star);
+        dataParams.push(activeFilters.star);
+      }
+      if (activeFilters.raasi) {
+        whereConditions.push('raasi = ?');
+        countParams.push(activeFilters.raasi);
+        dataParams.push(activeFilters.raasi);
+      }
+      if (activeFilters.maritalStatus) {
+        whereConditions.push('maritalStatus = ?');
+        countParams.push(activeFilters.maritalStatus);
+        dataParams.push(activeFilters.maritalStatus);
+      }
+      if (activeFilters.qualification) {
+        whereConditions.push('qualification = ?');
+        countParams.push(activeFilters.qualification);
+        dataParams.push(activeFilters.qualification);
+      }
+      if (activeFilters.occupation) {
+        whereConditions.push('occupation = ?');
+        countParams.push(activeFilters.occupation);
+        dataParams.push(activeFilters.occupation);
+      }
+      if (activeFilters.minAge) {
+        whereConditions.push("CAST((strftime('%Y', 'now') - strftime('%Y', dob)) AS INT) >= ?");
+        const minA = parseInt(activeFilters.minAge, 10);
+        countParams.push(minA);
+        dataParams.push(minA);
+      }
+      if (activeFilters.maxAge) {
+        whereConditions.push("CAST((strftime('%Y', 'now') - strftime('%Y', dob)) AS INT) <= ?");
+        const maxA = parseInt(activeFilters.maxAge, 10);
+        countParams.push(maxA);
+        dataParams.push(maxA);
+      }
     }
-    
+
+    if (whereConditions.length > 0) {
+      const clause = ' WHERE ' + whereConditions.join(' AND ');
+      countQuery += clause;
+      dataQuery += clause;
+    }
+
+    dataQuery += ' ORDER BY createdAt DESC LIMIT ? OFFSET ?';
     dataParams.push(PAGE_SIZE, (page - 1) * PAGE_SIZE);
 
     try {
       const countResult = await window.api.db.get(countQuery, countParams);
       const total = countResult ? countResult.count : 0;
       setTotalCount(total);
-      setTotalPages(Math.ceil(total / PAGE_SIZE));
+      setTotalPages(Math.max(1, Math.ceil(total / PAGE_SIZE)));
 
       const rows = await window.api.db.all(dataQuery, dataParams);
       setCandidates(rows || []);
     } catch (e) {
-      console.error(e);
+      console.error('[CandidateSearch] Query Execution Error:', e);
     }
-  };
+  }, [searchMode, debouncedSearch, activeFilters, page]);
 
   useEffect(() => {
     loadCandidates();
-  }, [debouncedSearch, page]);
+  }, [loadCandidates]);
 
   const handleDelete = async (id: number) => {
     if (confirm(t('confirmDelete'))) {
@@ -68,30 +189,226 @@ export default function CandidateSearch() {
   };
 
   return (
-    <div className="form-container page-transition">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+    <div className="form-container page-transition" style={{ marginBottom: '40px' }}>
+      {/* Header & Dual Search Tabs */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 600 }}>{t('candidateDatabase')}</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-          <div style={{ position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+        
+        {/* Dual Tab Toggle Controls */}
+        <div style={{ display: 'inline-flex', backgroundColor: '#edf2f7', padding: '4px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+          <button
+            type="button"
+            className="btn"
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              backgroundColor: searchMode === 'standard' ? '#ffffff' : 'transparent',
+              color: searchMode === 'standard' ? 'var(--primary-color)' : 'var(--text-muted)',
+              boxShadow: searchMode === 'standard' ? '0 2px 4px rgba(0,0,0,0.08)' : 'none',
+              border: 'none',
+              transition: 'all 0.15s ease-out',
+            }}
+            onClick={() => setSearchMode('standard')}
+          >
+            <Search size={15} style={{ marginRight: '6px' }} />
+            {t('standardSearch')}
+          </button>
+          <button
+            type="button"
+            className="btn"
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              backgroundColor: searchMode === 'advanced' ? '#ffffff' : 'transparent',
+              color: searchMode === 'advanced' ? 'var(--primary-color)' : 'var(--text-muted)',
+              boxShadow: searchMode === 'advanced' ? '0 2px 4px rgba(0,0,0,0.08)' : 'none',
+              border: 'none',
+              transition: 'all 0.15s ease-out',
+            }}
+            onClick={() => setSearchMode('advanced')}
+          >
+            <Filter size={15} style={{ marginRight: '6px' }} />
+            {t('advancedSearch')}
+          </button>
+        </div>
+      </div>
+
+      {/* Tab 1: Standard Quick Search Bar */}
+      {searchMode === 'standard' && (
+        <div style={{ marginBottom: '28px', backgroundColor: 'var(--card-bg)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <div style={{ position: 'relative', width: '100%' }}>
+            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input
               type="text"
               className="form-control"
-              placeholder={t('searchPlaceholder') || "Enter search criteria..."}
-              style={{ paddingLeft: '38px', width: '100%', maxWidth: '450px' }}
+              placeholder={t('searchPlaceholder') || "Search by ID, Name, Phone, Caste, Raasi..."}
+              style={{ paddingLeft: '42px', width: '100%' }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px', maxWidth: '450px', textAlign: 'right' }}>
-            <strong>Search by:</strong> ID, Name, Phone, Caste, Sub-Caste, Star, Raasi, Place of Birth, Date of Birth, or Reg Date (YYYY-MM-DD)
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '8px' }}>
+            <strong>Quick Search:</strong> Type ID, Name, Phone, Caste, Sub-Caste, Star, Raasi, or DOB.
           </div>
         </div>
-      </div>
+      )}
 
+      {/* Tab 2: Advanced Multi-Filter Grid Panel */}
+      {searchMode === 'advanced' && (
+        <div style={{ marginBottom: '28px', backgroundColor: 'var(--card-bg)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+            
+            {/* Gender */}
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('gender')}</label>
+              <select className="form-control" value={filters.gender} onChange={e => handleFilterChange('gender', e.target.value)}>
+                <option value="">{t('allGenders')}</option>
+                <option value="Male">{t('male')}</option>
+                <option value="Female">{t('female')}</option>
+              </select>
+            </div>
+
+            {/* Caste */}
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('caste')}</label>
+              <select className="form-control" value={filters.caste} onChange={e => handleFilterChange('caste', e.target.value)}>
+                <option value="">{t('allCastes')}</option>
+                {options.castes.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+
+            {/* Sub Caste */}
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('subCaste')}</label>
+              <select className="form-control" value={filters.subCaste} onChange={e => handleFilterChange('subCaste', e.target.value)}>
+                <option value="">{t('allSubCastes')}</option>
+                {options.subCastes.map(sc => <option key={sc} value={sc}>{sc}</option>)}
+              </select>
+            </div>
+
+            {/* Star */}
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('star')}</label>
+              <select className="form-control" value={filters.star} onChange={e => handleFilterChange('star', e.target.value)}>
+                <option value="">{t('allStars')}</option>
+                {options.stars.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+
+            {/* Raasi */}
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('raasi')}</label>
+              <select className="form-control" value={filters.raasi} onChange={e => handleFilterChange('raasi', e.target.value)}>
+                <option value="">{t('allRaasis')}</option>
+                {options.raasis.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+
+            {/* Marital Status */}
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('maritalStatus')}</label>
+              <select className="form-control" value={filters.maritalStatus} onChange={e => handleFilterChange('maritalStatus', e.target.value)}>
+                <option value="">{t('select')}</option>
+                <option value="Unmarried">{t('unmarried')}</option>
+                <option value="Married">{t('married')}</option>
+                <option value="Divorced">{t('divorced')}</option>
+                <option value="Widowed">{t('widowed')}</option>
+              </select>
+            </div>
+
+            {/* Qualification */}
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('qualification')}</label>
+              <select className="form-control" value={filters.qualification} onChange={e => handleFilterChange('qualification', e.target.value)}>
+                <option value="">{t('allQualifications')}</option>
+                {options.qualifications.map(q => <option key={q} value={q}>{q}</option>)}
+              </select>
+            </div>
+
+            {/* Occupation */}
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('occupation')}</label>
+              <select className="form-control" value={filters.occupation} onChange={e => handleFilterChange('occupation', e.target.value)}>
+                <option value="">{t('allOccupations')}</option>
+                {options.occupations.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+
+            {/* Min Age */}
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('minAge')}</label>
+              <input
+                type="number"
+                className="form-control"
+                placeholder="18"
+                min="18"
+                max="80"
+                value={filters.minAge}
+                onChange={e => handleFilterChange('minAge', e.target.value)}
+              />
+            </div>
+
+            {/* Max Age */}
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('maxAge')}</label>
+              <input
+                type="number"
+                className="form-control"
+                placeholder="60"
+                min="18"
+                max="80"
+                value={filters.maxAge}
+                onChange={e => handleFilterChange('maxAge', e.target.value)}
+              />
+            </div>
+
+          </div>
+
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ padding: '8px 16px' }}
+              onClick={handleResetFilters}
+            >
+              <RefreshCw size={15} style={{ marginRight: '6px' }} />
+              {t('resetFilters')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ padding: '8px 24px', backgroundColor: 'var(--accent-gold)' }}
+              onClick={handleApplyFilters}
+            >
+              <Filter size={15} style={{ marginRight: '6px' }} />
+              {t('applyFilters')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Candidate Card Results Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px', marginBottom: '32px' }}>
         {candidates.map(candidate => (
-          <div key={candidate.id} style={{ backgroundColor: 'var(--card-bg)', borderRadius: '12px', padding: '24px', border: '1px solid var(--border-color)', boxShadow: '0 2px 8px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: '16px', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default' }} 
+          <div
+            key={candidate.id}
+            style={{
+              backgroundColor: 'var(--card-bg)',
+              borderRadius: '12px',
+              padding: '24px',
+              border: '1px solid var(--border-color)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              transition: 'transform 0.15s ease-out, box-shadow 0.15s ease-out',
+              cursor: 'default'
+            }} 
             onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.06)'; }}
             onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.03)'; }}
           >
@@ -128,6 +445,7 @@ export default function CandidateSearch() {
             </div>
           </div>
         ))}
+
         {candidates.length === 0 && (
           <div style={{ gridColumn: '1 / -1', padding: '64px 32px', textAlign: 'center', color: 'var(--text-muted)', backgroundColor: 'var(--card-bg)', borderRadius: '12px', border: '1px dashed var(--border-color)' }}>
             <Search size={40} style={{ opacity: 0.3, marginBottom: '16px' }} />
@@ -136,8 +454,9 @@ export default function CandidateSearch() {
         )}
       </div>
 
+      {/* Pagination Footer Controls */}
       {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px', marginBottom: '40px', borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px', marginBottom: '40px', borderTop: '1px solid var(--border-color)', paddingTop: '20px', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
             Showing {((page - 1) * PAGE_SIZE) + 1} to {Math.min(page * PAGE_SIZE, totalCount)} of {totalCount} profiles
           </div>

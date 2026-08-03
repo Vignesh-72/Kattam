@@ -175,10 +175,15 @@ function initDB() {
       db.run('CREATE INDEX IF NOT EXISTS idx_contact ON candidates(contactNumber)');
       db.run('CREATE INDEX IF NOT EXISTS idx_regid ON candidates(registrationId)');
       db.run('CREATE INDEX IF NOT EXISTS idx_caste ON candidates(caste)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_subcaste ON candidates(subCaste)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_gender ON candidates(gender)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_star ON candidates(star)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_raasi ON candidates(raasi)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_marital ON candidates(maritalStatus)');
       db.run('CREATE INDEX IF NOT EXISTS idx_created ON candidates(createdAt)');
-      // Composite index for the most common matrimonial search pattern:
-      // WHERE gender = 'Female' AND caste = 'Vanniyar'
+      // Composite index for common matrimonial search queries
       db.run('CREATE INDEX IF NOT EXISTS idx_candidate_search ON candidates(gender, caste, registrationId)');
+      db.run('CREATE INDEX IF NOT EXISTS idx_adv_filter ON candidates(gender, caste, maritalStatus)');
     });
 
     // Run migrations after table is guaranteed to exist
@@ -237,6 +242,35 @@ ipcMain.handle('db:get', (event, query, params) => {
       if (err) reject(err);
       else resolve(row);
     });
+  });
+});
+
+ipcMain.handle('db:getSearchOptions', async () => {
+  return new Promise((resolve) => {
+    const queries = {
+      castes: "SELECT DISTINCT caste FROM candidates WHERE caste IS NOT NULL AND caste != '' ORDER BY caste ASC",
+      subCastes: "SELECT DISTINCT subCaste FROM candidates WHERE subCaste IS NOT NULL AND subCaste != '' ORDER BY subCaste ASC",
+      stars: "SELECT DISTINCT star FROM candidates WHERE star IS NOT NULL AND star != '' ORDER BY star ASC",
+      raasis: "SELECT DISTINCT raasi FROM candidates WHERE raasi IS NOT NULL AND raasi != '' ORDER BY raasi ASC",
+      qualifications: "SELECT DISTINCT qualification FROM candidates WHERE qualification IS NOT NULL AND qualification != '' ORDER BY qualification ASC",
+      occupations: "SELECT DISTINCT occupation FROM candidates WHERE occupation IS NOT NULL AND occupation != '' ORDER BY occupation ASC"
+    };
+
+    const results = {};
+    const keys = Object.keys(queries);
+    let pending = keys.length;
+
+    for (const key of keys) {
+      db.all(queries[key], [], (err, rows) => {
+        if (!err && rows) {
+          results[key] = rows.map(r => Object.values(r)[0]).filter(Boolean);
+        } else {
+          results[key] = [];
+        }
+        pending--;
+        if (pending === 0) resolve(results);
+      });
+    }
   });
 });
 
