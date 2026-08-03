@@ -152,7 +152,7 @@ export default function ProfileView() {
           <div style={{ flexGrow: 1 }}>
             {/* Highlighted Full Name Header */}
             <div style={{ fontSize: '19px', fontWeight: 800, color: '#000', marginBottom: '8px', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px' }}>
-              {t('fullName') || 'பெயர்'}: <span style={{ color: '#7A2E2E' }}>{candidate.fullName}</span>
+              {t('fullName') || 'பெயர்'}: <span style={{ color: '#000000' }}>{candidate.fullName}</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px', fontSize: '12px' }}>
               <div><strong>{t('gender')}:</strong> {candidate.gender ? t(candidate.gender.toLowerCase() as any) || candidate.gender : ''}</div>
@@ -215,7 +215,7 @@ export default function ProfileView() {
 
         {/* Single-Page Kattam (Horoscope Charts) */}
         {(candidate.rasiKattam || candidate.amsamKattam) && (
-          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed #cbd5e0' }}>
+          <div style={{ marginTop: '10px', paddingTop: '6px' }}>
             <h4 style={{ color: '#000', fontSize: '13px', margin: '0 0 10px 0', borderBottom: '1px solid #ccc', paddingBottom: '2px' }}>
               {t('horoscopeCharts') || 'Horoscope Charts (Kattam)'}
             </h4>
