@@ -13,9 +13,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // PERF-02: Language preference is now persisted to localStorage.
   // Previously this reset to 'en' on every app restart, forcing Tamil-speaking
   // operators to re-toggle the language every session (multiple times per day).
-  const [language, setLanguageState] = useState<Language>(
-    () => (localStorage.getItem('kattam_lang') as Language) || 'ta'
-  );
+  const [language, setLanguageState] = useState<Language>(() => {
+    // Migrate legacy stored preference in Electron userData if it was set to 'en' previously
+    const isMigrated = localStorage.getItem('kattam_lang_default_v2');
+    if (!isMigrated) {
+      localStorage.setItem('kattam_lang', 'ta');
+      localStorage.setItem('kattam_lang_default_v2', 'true');
+      return 'ta';
+    }
+    return (localStorage.getItem('kattam_lang') as Language) || 'ta';
+  });
 
   const setLanguage = (lang: Language) => {
     localStorage.setItem('kattam_lang', lang);
