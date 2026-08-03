@@ -58,9 +58,11 @@ interface SearchCache {
 }
 
 let searchCache: SearchCache | null = null;
+let cachedDbOptions: SearchOptions | null = null;
 
 export function invalidateSearchCache() {
   searchCache = null;
+  cachedDbOptions = null;
 }
 
 export default function CandidateSearch() {
@@ -71,7 +73,7 @@ export default function CandidateSearch() {
   const [filters, setFilters] = useState(() => searchCache?.filters || initialFilterState);
   const [activeFilters, setActiveFilters] = useState(() => searchCache?.activeFilters || initialFilterState);
   
-  const [dbOptions, setDbOptions] = useState<SearchOptions>(() => searchCache?.dbOptions || {
+  const [dbOptions, setDbOptions] = useState<SearchOptions>(() => cachedDbOptions || searchCache?.dbOptions || {
     castes: [], subCastes: [], gothrams: [], stars: [], raasis: [], laknams: [],
     qualifications: [], occupations: [], religions: [], motherTongues: [], nativities: [], jobPlaces: [],
     diets: [], partnerJobReqs: [], partnerHoroscopeReqs: [], maritalStatuses: []
@@ -81,6 +83,7 @@ export default function CandidateSearch() {
   const [totalPages, setTotalPages] = useState(() => searchCache?.totalPages || 1);
   const [totalCount, setTotalCount] = useState(() => searchCache?.totalCount || 0);
   const [loading, setLoading] = useState(() => !searchCache);
+  const isInitialMount = useRef(true);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const PAGE_SIZE = 12;
@@ -100,7 +103,7 @@ export default function CandidateSearch() {
         } catch (_) {}
       }
       if (res) {
-        setDbOptions({
+        const opts: SearchOptions = {
           castes: res.castes || [],
           subCastes: res.subCastes || [],
           gothrams: res.gothrams || [],
@@ -117,16 +120,23 @@ export default function CandidateSearch() {
           partnerJobReqs: res.partnerJobReqs || [],
           partnerHoroscopeReqs: res.partnerHoroscopeReqs || [],
           maritalStatuses: res.maritalStatuses || [],
-        });
+        };
+        cachedDbOptions = opts;
+        setDbOptions(opts);
       }
     } catch (err) {
       console.error('[CandidateSearch] Error fetching DB filter options:', err);
     }
   }, []);
 
-  // Fetch initial distinct database filter options on component mount
+  // Fetch distinct database filter options only if not already cached, deferred off main scroll thread
   useEffect(() => {
-    fetchFilterOptions();
+    if (!cachedDbOptions || cachedDbOptions.castes.length === 0) {
+      const timer = setTimeout(() => {
+        fetchFilterOptions();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
   }, [fetchFilterOptions]);
 
   // Options derived strictly from database queries
@@ -341,6 +351,12 @@ export default function CandidateSearch() {
   }, [searchMode, activeSearchTerm, activeFilters, searchTerm, filters, dbOptions]);
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (searchCache && searchCache.candidates.length > 0 && searchCache.page === page) {
+        return;
+      }
+    }
     loadCandidates(page);
   }, [searchMode, activeSearchTerm, activeFilters, page, loadCandidates]);
 
