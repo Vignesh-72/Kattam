@@ -248,12 +248,12 @@ ipcMain.handle('db:get', (event, query, params) => {
 const fetchSearchFilterOptions = () => {
   return new Promise((resolve) => {
     const queries = {
-      castes: "SELECT DISTINCT caste FROM candidates WHERE caste IS NOT NULL AND TRIM(caste) != '' ORDER BY caste ASC",
-      subCastes: "SELECT DISTINCT subCaste FROM candidates WHERE subCaste IS NOT NULL AND TRIM(subCaste) != '' ORDER BY subCaste ASC",
-      stars: "SELECT DISTINCT star FROM candidates WHERE star IS NOT NULL AND TRIM(star) != '' ORDER BY star ASC",
-      raasis: "SELECT DISTINCT raasi FROM candidates WHERE raasi IS NOT NULL AND TRIM(raasi) != '' ORDER BY raasi ASC",
-      qualifications: "SELECT DISTINCT qualification FROM candidates WHERE qualification IS NOT NULL AND TRIM(qualification) != '' ORDER BY qualification ASC",
-      occupations: "SELECT DISTINCT occupation FROM candidates WHERE occupation IS NOT NULL AND TRIM(occupation) != '' ORDER BY occupation ASC"
+      castes: "SELECT DISTINCT TRIM(caste) as val FROM candidates WHERE caste IS NOT NULL AND TRIM(caste) != '' ORDER BY val ASC",
+      subCastes: "SELECT DISTINCT TRIM(subCaste) as val FROM candidates WHERE subCaste IS NOT NULL AND TRIM(subCaste) != '' ORDER BY val ASC",
+      stars: "SELECT DISTINCT TRIM(star) as val FROM candidates WHERE star IS NOT NULL AND TRIM(star) != '' ORDER BY val ASC",
+      raasis: "SELECT DISTINCT TRIM(raasi) as val FROM candidates WHERE raasi IS NOT NULL AND TRIM(raasi) != '' ORDER BY val ASC",
+      qualifications: "SELECT DISTINCT TRIM(qualification) as val FROM candidates WHERE qualification IS NOT NULL AND TRIM(qualification) != '' ORDER BY val ASC",
+      occupations: "SELECT DISTINCT TRIM(occupation) as val FROM candidates WHERE occupation IS NOT NULL AND TRIM(occupation) != '' ORDER BY val ASC"
     };
 
     const results = {};
@@ -263,7 +263,7 @@ const fetchSearchFilterOptions = () => {
     for (const key of keys) {
       db.all(queries[key], [], (err, rows) => {
         if (!err && rows) {
-          results[key] = rows.map(r => Object.values(r)[0]).filter(v => v && String(v).trim().length > 0);
+          results[key] = rows.map(r => r.val).filter(v => v && String(v).trim().length > 0);
         } else {
           results[key] = [];
         }

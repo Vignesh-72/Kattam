@@ -12,6 +12,16 @@ interface SearchOptions {
   occupations: string[];
 }
 
+const FALLBACK_CASTES = [
+  "Brahmin", "Vanniyar", "Gounder", "Thevar", "Mudaliar", "Nadar", "Chettiar",
+  "Kamma", "Naidu", "Pillai", "Yadav", "Viswakarma", "Adidravidar", "Nair",
+  "Reddy", "Patel", "Rajput", "Kshatriya", "Baniya"
+];
+
+const FALLBACK_SUBCASTES = [
+  "Smartha", "Iyengar", "Iyer", "Saiva", "Vadama", "Thenkalai", "Vadakalai", "Kongu", "General"
+];
+
 const FALLBACK_STARS = [
   "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha",
   "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshta",
@@ -21,6 +31,16 @@ const FALLBACK_STARS = [
 const FALLBACK_RAASIS = [
   "Mesham", "Rishabham", "Mithunam", "Kadagam", "Simmam", "Kanni",
   "Thulaam", "Viruchigam", "Dhanusu", "Makaramm", "Kumbam", "Meenam"
+];
+
+const FALLBACK_QUALIFICATIONS = [
+  "B.E / B.Tech", "M.E / M.Tech", "B.Sc", "M.Sc", "B.Com", "M.Com", "B.A", "M.A",
+  "BBA", "MBA", "BCA", "MCA", "MBBS", "B.Pharm", "Diploma", "12th Standard", "10th Standard"
+];
+
+const FALLBACK_OCCUPATIONS = [
+  "Software Engineer", "Government Job", "Business", "Doctor", "Teacher / Professor",
+  "Bank Manager", "Engineer", "Accountant", "Self Employed", "Private Employee"
 ];
 
 const initialFilterState = {
@@ -77,13 +97,36 @@ export default function CandidateSearch() {
     return () => { isMounted = false; };
   }, []);
 
-  // Memoized options with fallback for Stars/Raasis if DB is fresh
-  const casteOptions = useMemo(() => dbOptions.castes || [], [dbOptions.castes]);
-  const subCasteOptions = useMemo(() => dbOptions.subCastes || [], [dbOptions.subCastes]);
-  const starOptions = useMemo(() => (dbOptions.stars && dbOptions.stars.length > 0 ? dbOptions.stars : FALLBACK_STARS), [dbOptions.stars]);
-  const raasiOptions = useMemo(() => (dbOptions.raasis && dbOptions.raasis.length > 0 ? dbOptions.raasis : FALLBACK_RAASIS), [dbOptions.raasis]);
-  const qualificationOptions = useMemo(() => dbOptions.qualifications || [], [dbOptions.qualifications]);
-  const occupationOptions = useMemo(() => dbOptions.occupations || [], [dbOptions.occupations]);
+  // Options: Combine SQLite distinct values with Fallbacks to guarantee populated dropdowns
+  const casteOptions = useMemo(() => {
+    const list = dbOptions.castes && dbOptions.castes.length > 0 ? dbOptions.castes : FALLBACK_CASTES;
+    return Array.from(new Set([...list])).sort();
+  }, [dbOptions.castes]);
+
+  const subCasteOptions = useMemo(() => {
+    const list = dbOptions.subCastes && dbOptions.subCastes.length > 0 ? dbOptions.subCastes : FALLBACK_SUBCASTES;
+    return Array.from(new Set([...list])).sort();
+  }, [dbOptions.subCastes]);
+
+  const starOptions = useMemo(() => {
+    const list = dbOptions.stars && dbOptions.stars.length > 0 ? dbOptions.stars : FALLBACK_STARS;
+    return Array.from(new Set([...list]));
+  }, [dbOptions.stars]);
+
+  const raasiOptions = useMemo(() => {
+    const list = dbOptions.raasis && dbOptions.raasis.length > 0 ? dbOptions.raasis : FALLBACK_RAASIS;
+    return Array.from(new Set([...list]));
+  }, [dbOptions.raasis]);
+
+  const qualificationOptions = useMemo(() => {
+    const list = dbOptions.qualifications && dbOptions.qualifications.length > 0 ? dbOptions.qualifications : FALLBACK_QUALIFICATIONS;
+    return Array.from(new Set([...list])).sort();
+  }, [dbOptions.qualifications]);
+
+  const occupationOptions = useMemo(() => {
+    const list = dbOptions.occupations && dbOptions.occupations.length > 0 ? dbOptions.occupations : FALLBACK_OCCUPATIONS;
+    return Array.from(new Set([...list])).sort();
+  }, [dbOptions.occupations]);
 
   // Debounce for standard text search
   useEffect(() => {
@@ -98,7 +141,6 @@ export default function CandidateSearch() {
     setFilters(prev => ({
       ...prev,
       [key]: value,
-      // Reset dependent subCaste if caste is cleared
       ...(key === 'caste' && !value ? { subCaste: '' } : {})
     }));
   };
@@ -132,46 +174,48 @@ export default function CandidateSearch() {
         }
       }
     } else {
-      // Advanced Multi-Criteria Filter Query Builder
+      // Advanced Multi-Criteria Filter Query Builder with Case-Insensitive / LIKE Matching
       if (activeFilters.gender) {
         whereConditions.push('LOWER(gender) = LOWER(?)');
         countParams.push(activeFilters.gender);
         dataParams.push(activeFilters.gender);
       }
       if (activeFilters.caste) {
-        whereConditions.push('caste = ?');
+        whereConditions.push('LOWER(TRIM(caste)) = LOWER(TRIM(?))');
         countParams.push(activeFilters.caste);
         dataParams.push(activeFilters.caste);
       }
       if (activeFilters.subCaste) {
-        whereConditions.push('subCaste = ?');
+        whereConditions.push('LOWER(TRIM(subCaste)) = LOWER(TRIM(?))');
         countParams.push(activeFilters.subCaste);
         dataParams.push(activeFilters.subCaste);
       }
       if (activeFilters.star) {
-        whereConditions.push('star = ?');
+        whereConditions.push('LOWER(TRIM(star)) = LOWER(TRIM(?))');
         countParams.push(activeFilters.star);
         dataParams.push(activeFilters.star);
       }
       if (activeFilters.raasi) {
-        whereConditions.push('raasi = ?');
+        whereConditions.push('LOWER(TRIM(raasi)) = LOWER(TRIM(?))');
         countParams.push(activeFilters.raasi);
         dataParams.push(activeFilters.raasi);
       }
       if (activeFilters.maritalStatus) {
-        whereConditions.push('maritalStatus = ?');
+        whereConditions.push('LOWER(TRIM(maritalStatus)) = LOWER(TRIM(?))');
         countParams.push(activeFilters.maritalStatus);
         dataParams.push(activeFilters.maritalStatus);
       }
       if (activeFilters.qualification) {
-        whereConditions.push('qualification = ?');
-        countParams.push(activeFilters.qualification);
-        dataParams.push(activeFilters.qualification);
+        whereConditions.push('LOWER(qualification) LIKE LOWER(?)');
+        const qTerm = `%${activeFilters.qualification.trim()}%`;
+        countParams.push(qTerm);
+        dataParams.push(qTerm);
       }
       if (activeFilters.occupation) {
-        whereConditions.push('occupation = ?');
-        countParams.push(activeFilters.occupation);
-        dataParams.push(activeFilters.occupation);
+        whereConditions.push('LOWER(occupation) LIKE LOWER(?)');
+        const oTerm = `%${activeFilters.occupation.trim()}%`;
+        countParams.push(oTerm);
+        dataParams.push(oTerm);
       }
       if (activeFilters.minAge) {
         whereConditions.push("CAST((strftime('%Y', 'now') - strftime('%Y', dob)) AS INT) >= ?");
@@ -197,13 +241,15 @@ export default function CandidateSearch() {
     dataParams.push(PAGE_SIZE, (page - 1) * PAGE_SIZE);
 
     try {
-      const countResult = await window.api.db.get(countQuery, countParams);
-      const total = countResult ? countResult.count : 0;
-      setTotalCount(total);
-      setTotalPages(Math.max(1, Math.ceil(total / PAGE_SIZE)));
+      if (window.api?.db?.get) {
+        const countResult = await window.api.db.get(countQuery, countParams);
+        const total = countResult ? countResult.count : 0;
+        setTotalCount(total);
+        setTotalPages(Math.max(1, Math.ceil(total / PAGE_SIZE)));
 
-      const rows = await window.api.db.all(dataQuery, dataParams);
-      setCandidates(rows || []);
+        const rows = await window.api.db.all(dataQuery, dataParams);
+        setCandidates(rows || []);
+      }
     } catch (e) {
       console.error('[CandidateSearch] Query Execution Error:', e);
     }
@@ -215,8 +261,10 @@ export default function CandidateSearch() {
 
   const handleDelete = async (id: number) => {
     if (confirm(t('confirmDelete'))) {
-      await window.api.db.run('DELETE FROM candidates WHERE id = ?', [id]);
-      loadCandidates();
+      if (window.api?.db?.run) {
+        await window.api.db.run('DELETE FROM candidates WHERE id = ?', [id]);
+        loadCandidates();
+      }
     }
   };
 
@@ -304,7 +352,7 @@ export default function CandidateSearch() {
               </select>
             </div>
 
-            {/* Caste - Dynamically Populated from DB */}
+            {/* Caste */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('caste')}</label>
               <select className="form-control" value={filters.caste} onChange={e => handleFilterChange('caste', e.target.value)}>
@@ -315,7 +363,7 @@ export default function CandidateSearch() {
               </select>
             </div>
 
-            {/* Sub Caste - Dynamically Populated from DB */}
+            {/* Sub Caste */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('subCaste')}</label>
               <select className="form-control" value={filters.subCaste} onChange={e => handleFilterChange('subCaste', e.target.value)}>
@@ -326,7 +374,7 @@ export default function CandidateSearch() {
               </select>
             </div>
 
-            {/* Star - Dynamically Populated from DB */}
+            {/* Star */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('star')}</label>
               <select className="form-control" value={filters.star} onChange={e => handleFilterChange('star', e.target.value)}>
@@ -337,7 +385,7 @@ export default function CandidateSearch() {
               </select>
             </div>
 
-            {/* Raasi - Dynamically Populated from DB */}
+            {/* Raasi */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('raasi')}</label>
               <select className="form-control" value={filters.raasi} onChange={e => handleFilterChange('raasi', e.target.value)}>
@@ -360,7 +408,7 @@ export default function CandidateSearch() {
               </select>
             </div>
 
-            {/* Qualification - Dynamically Populated from DB */}
+            {/* Qualification */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('qualification')}</label>
               <select className="form-control" value={filters.qualification} onChange={e => handleFilterChange('qualification', e.target.value)}>
@@ -371,7 +419,7 @@ export default function CandidateSearch() {
               </select>
             </div>
 
-            {/* Occupation - Dynamically Populated from DB */}
+            {/* Occupation */}
             <div>
               <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('occupation')}</label>
               <select className="form-control" value={filters.occupation} onChange={e => handleFilterChange('occupation', e.target.value)}>
@@ -459,7 +507,7 @@ export default function CandidateSearch() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                 <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: 'var(--primary-color)', color: 'var(--text-on-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 'bold' }}>
-                  {candidate.fullName.charAt(0).toUpperCase()}
+                  {candidate.fullName ? candidate.fullName.charAt(0).toUpperCase() : 'C'}
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-main)', fontWeight: 700, fontFamily: 'var(--font-sans)' }}>{candidate.fullName}</h3>
