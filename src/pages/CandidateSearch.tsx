@@ -16,6 +16,9 @@ interface SearchOptions {
   motherTongues: string[];
   nativities: string[];
   jobPlaces: string[];
+  diets: string[];
+  partnerJobReqs: string[];
+  partnerHoroscopeReqs: string[];
 }
 
 const initialFilterState = {
@@ -50,7 +53,8 @@ export default function CandidateSearch() {
   
   const [dbOptions, setDbOptions] = useState<SearchOptions>({
     castes: [], subCastes: [], gothrams: [], stars: [], raasis: [], laknams: [],
-    qualifications: [], occupations: [], religions: [], motherTongues: [], nativities: [], jobPlaces: []
+    qualifications: [], occupations: [], religions: [], motherTongues: [], nativities: [], jobPlaces: [],
+    diets: [], partnerJobReqs: [], partnerHoroscopeReqs: []
   });
   
   const [page, setPage] = useState(1);
@@ -88,6 +92,9 @@ export default function CandidateSearch() {
           motherTongues: res.motherTongues && res.motherTongues.length > 0 ? res.motherTongues : prev.motherTongues,
           nativities: res.nativities && res.nativities.length > 0 ? res.nativities : prev.nativities,
           jobPlaces: res.jobPlaces && res.jobPlaces.length > 0 ? res.jobPlaces : prev.jobPlaces,
+          diets: res.diets && res.diets.length > 0 ? res.diets : prev.diets,
+          partnerJobReqs: res.partnerJobReqs && res.partnerJobReqs.length > 0 ? res.partnerJobReqs : prev.partnerJobReqs,
+          partnerHoroscopeReqs: res.partnerHoroscopeReqs && res.partnerHoroscopeReqs.length > 0 ? res.partnerHoroscopeReqs : prev.partnerHoroscopeReqs,
         }));
       }
     } catch (err) {
@@ -118,6 +125,9 @@ export default function CandidateSearch() {
   const motherTongueOptions = useMemo(() => dbOptions.motherTongues || [], [dbOptions.motherTongues]);
   const nativityOptions = useMemo(() => dbOptions.nativities || [], [dbOptions.nativities]);
   const jobPlaceOptions = useMemo(() => dbOptions.jobPlaces || [], [dbOptions.jobPlaces]);
+  const dietOptions = useMemo(() => dbOptions.diets || [], [dbOptions.diets]);
+  const partnerJobReqOptions = useMemo(() => dbOptions.partnerJobReqs || [], [dbOptions.partnerJobReqs]);
+  const partnerHoroscopeReqOptions = useMemo(() => dbOptions.partnerHoroscopeReqs || [], [dbOptions.partnerHoroscopeReqs]);
 
   // Triggers search query execution ONLY when user clicks Search / presses Enter
   const handleStandardSearchSubmit = (e?: React.FormEvent) => {
@@ -588,7 +598,7 @@ export default function CandidateSearch() {
             </div>
           </div>
 
-          {/* Section 4: Lifestyle & Partner Expectations */}
+          {/* Section 4: Lifestyle & Expectations (Dynamic SQLite data populated options) */}
           <div style={{ marginBottom: '20px' }}>
             <h4 style={{ fontSize: '0.9rem', color: 'var(--primary-color)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
               <Heart size={16} /> Lifestyle & Expectations
@@ -599,9 +609,17 @@ export default function CandidateSearch() {
                 <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('diet')}</label>
                 <select className="form-control" value={filters.diet} onChange={e => handleFilterChange('diet', e.target.value)}>
                   <option value="">{t('allDiets') || "All Diets"}</option>
-                  <option value="Vegetarian">{t('vegetarian')}</option>
-                  <option value="Non-Vegetarian">{t('nonVegetarian')}</option>
-                  <option value="Eggetarian">{t('eggetarian')}</option>
+                  {dietOptions.length > 0 ? (
+                    dietOptions.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Vegetarian">{t('vegetarian')}</option>
+                      <option value="Non-Vegetarian">{t('nonVegetarian')}</option>
+                      <option value="Eggetarian">{t('eggetarian')}</option>
+                    </>
+                  )}
                 </select>
               </div>
 
@@ -610,9 +628,17 @@ export default function CandidateSearch() {
                 <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('partnerJobReq')}</label>
                 <select className="form-control" value={filters.partnerJobReq} onChange={e => handleFilterChange('partnerJobReq', e.target.value)}>
                   <option value="">{t('select')}</option>
-                  <option value="Required">{t('required')}</option>
-                  <option value="Not required">{t('notRequired')}</option>
-                  <option value="Optional">{t('optional')}</option>
+                  {partnerJobReqOptions.length > 0 ? (
+                    partnerJobReqOptions.map(pj => (
+                      <option key={pj} value={pj}>{pj}</option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Required">{t('required')}</option>
+                      <option value="Not required">{t('notRequired')}</option>
+                      <option value="Optional">{t('optional')}</option>
+                    </>
+                  )}
                 </select>
               </div>
 
@@ -621,9 +647,17 @@ export default function CandidateSearch() {
                 <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('partnerHoroscopeReq')}</label>
                 <select className="form-control" value={filters.partnerHoroscopeReq} onChange={e => handleFilterChange('partnerHoroscopeReq', e.target.value)}>
                   <option value="">{t('select')}</option>
-                  <option value="Required">{t('required')}</option>
-                  <option value="Not required">{t('notRequired')}</option>
-                  <option value="Optional">{t('optional')}</option>
+                  {partnerHoroscopeReqOptions.length > 0 ? (
+                    partnerHoroscopeReqOptions.map(ph => (
+                      <option key={ph} value={ph}>{ph}</option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Required">{t('required')}</option>
+                      <option value="Not required">{t('notRequired')}</option>
+                      <option value="Optional">{t('optional')}</option>
+                    </>
+                  )}
                 </select>
               </div>
             </div>

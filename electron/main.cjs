@@ -270,7 +270,10 @@ const fetchSearchFilterOptions = (selectedCaste) => {
       religions: { sql: "SELECT DISTINCT TRIM(religion) as val FROM candidates WHERE religion IS NOT NULL AND TRIM(religion) != '' ORDER BY val ASC", params: [] },
       motherTongues: { sql: "SELECT DISTINCT TRIM(motherTongue) as val FROM candidates WHERE motherTongue IS NOT NULL AND TRIM(motherTongue) != '' ORDER BY val ASC", params: [] },
       nativities: { sql: "SELECT DISTINCT TRIM(nativity) as val FROM candidates WHERE nativity IS NOT NULL AND TRIM(nativity) != '' ORDER BY val ASC", params: [] },
-      jobPlaces: { sql: "SELECT DISTINCT TRIM(placeOfJob) as val FROM candidates WHERE placeOfJob IS NOT NULL AND TRIM(placeOfJob) != '' ORDER BY val ASC", params: [] }
+      jobPlaces: { sql: "SELECT DISTINCT TRIM(placeOfJob) as val FROM candidates WHERE placeOfJob IS NOT NULL AND TRIM(placeOfJob) != '' ORDER BY val ASC", params: [] },
+      diets: { sql: "SELECT DISTINCT TRIM(diet) as val FROM candidates WHERE diet IS NOT NULL AND TRIM(diet) != '' ORDER BY val ASC", params: [] },
+      partnerJobReqs: { sql: "SELECT DISTINCT TRIM(partnerJobReq) as val FROM candidates WHERE partnerJobReq IS NOT NULL AND TRIM(partnerJobReq) != '' ORDER BY val ASC", params: [] },
+      partnerHoroscopeReqs: { sql: "SELECT DISTINCT TRIM(partnerHoroscopeReq) as val FROM candidates WHERE partnerHoroscopeReq IS NOT NULL AND TRIM(partnerHoroscopeReq) != '' ORDER BY val ASC", params: [] }
     };
 
     const results = {};

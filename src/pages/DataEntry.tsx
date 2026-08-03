@@ -235,21 +235,10 @@ export default function DataEntry() {
                   type="text" 
                   className="form-control" 
                   name="motherTongue" 
-                  list="mother-tongue-list"
                   value={formData.motherTongue} 
                   onChange={handleChange} 
-                  placeholder="Type or select mother tongue..."
+                  placeholder="Enter mother tongue..."
                 />
-                <datalist id="mother-tongue-list">
-                  <option value="Tamil" />
-                  <option value="Telugu" />
-                  <option value="Malayalam" />
-                  <option value="Kannada" />
-                  <option value="Hindi" />
-                  <option value="English" />
-                  <option value="Saurashtra" />
-                  <option value="Marathi" />
-                </datalist>
               </div>
               <div className="form-group col-6">
                 <label>{t('maritalStatus')}</label>
@@ -397,7 +386,7 @@ export default function DataEntry() {
                   rows={4}
                   value={formData.partnerComments} 
                   onChange={handleChange} 
-                  placeholder="Enter detailed expectations and requirements (multiple lines supported)..." 
+                  placeholder="Enter detailed expectations and requirements..." 
                 />
               </div>
             </div>
