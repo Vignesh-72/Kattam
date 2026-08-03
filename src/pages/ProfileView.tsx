@@ -115,7 +115,7 @@ export default function ProfileView() {
         </div>
       </div>
       
-      <div id="print-area" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+      <div id="print-area" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
         <div id="print-page-1" style={{ backgroundColor: 'white', padding: '32px', color: '#2d3748' }}>
           {/* Header */}
           <div style={{ textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '12px', marginBottom: '16px' }}>
