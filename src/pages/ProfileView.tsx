@@ -58,7 +58,6 @@ export default function ProfileView() {
       });
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
       
       let canvas1: HTMLCanvasElement | null = await html2canvas(page1, {
         scale: 2.0,
@@ -66,7 +65,8 @@ export default function ProfileView() {
         scrollY: 0,
         logging: false
       });
-      const imgData1 = canvas1.toDataURL('image/jpeg', 0.90);
+      const imgData1 = canvas1.toDataURL('image/jpeg', 0.92);
+      const pdfHeight = (canvas1.height * pdfWidth) / canvas1.width;
       pdf.addImage(imgData1, 'JPEG', 0, 0, pdfWidth, pdfHeight);
 
       canvas1.width = 0;
@@ -82,7 +82,7 @@ export default function ProfileView() {
     }
   };
 
-  // Helper for compact readonly grid
+  // Helper for clear, unclipped readonly grid
   const ReadOnlyGrid = ({ title, data }: { title: string, data: Record<number, string[]> }) => {
     const getGridArea = (house: number) => {
       switch (house) {
@@ -93,10 +93,10 @@ export default function ProfileView() {
       }
     };
     return (
-      <div style={{ width: '200px', height: '200px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(4, 1fr)', border: '2px solid #000', backgroundColor: '#fff' }}>
-        <div style={{ gridColumn: '2 / 4', gridRow: '2 / 4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 700, color: '#000', border: '1px solid #718096' }}>{title}</div>
+      <div style={{ width: '270px', height: '270px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(4, 1fr)', border: '2px solid #000', backgroundColor: '#fff' }}>
+        <div style={{ gridColumn: '2 / 4', gridRow: '2 / 4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.05rem', fontWeight: 700, color: '#000', border: '1px solid #718096' }}>{title}</div>
         {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(house => (
-          <div key={house} style={{ border: '1px solid #718096', padding: '2px', gridArea: getGridArea(house), display: 'flex', flexDirection: 'column', fontSize: '0.62rem', lineHeight: 1.15, overflow: 'hidden' }}>
+          <div key={house} style={{ border: '1px solid #718096', padding: '3px 4px', gridArea: getGridArea(house), display: 'flex', flexDirection: 'column', fontSize: '0.72rem', lineHeight: 1.25, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
             {(data[house] || []).map((g, i) => <div key={i} style={{ fontWeight: 'bold' }}>{t(g.trim() as any) || g.trim()}</div>)}
           </div>
         ))}
