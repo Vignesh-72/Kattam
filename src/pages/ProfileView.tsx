@@ -83,7 +83,7 @@ export default function ProfileView() {
       }
     };
     return (
-      <div style={{ width: 'min(300px, 100%)', aspectRatio: '1 / 1', height: 'auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(4, 1fr)', border: '2px solid #000', backgroundColor: '#fff' }}>
+      <div style={{ width: '300px', height: '300px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(4, 1fr)', border: '2px solid #000', backgroundColor: '#fff' }}>
         <div style={{ gridColumn: '2 / 4', gridRow: '2 / 4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 600, color: '#000', border: '1px solid #718096' }}>{title}</div>
         {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(house => (
           <div key={house} style={{ border: '1px solid #718096', padding: '4px', gridArea: getGridArea(house), display: 'flex', flexDirection: 'column', fontSize: '0.75rem', lineHeight: 1.2 }}>
@@ -105,7 +105,7 @@ export default function ProfileView() {
       </div>
       
       <div id="print-area">
-        <div id="print-page-1" style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', color: '#2d3748', marginBottom: '20px' }}>
+        <div id="print-page-1" style={{ backgroundColor: 'white', padding: '24px', border: '1px solid #e2e8f0', color: '#2d3748', marginBottom: '20px' }}>
           {/* Header */}
           <div style={{ textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '12px', marginBottom: '16px' }}>
             <img src="/images/logo_transparent.png" alt="Logo" style={{ height: '60px', marginBottom: '8px' }} className="print-logo" />
@@ -197,7 +197,7 @@ export default function ProfileView() {
         </div>
 
         {/* Charts Page */}
-        <div id="print-page-2" style={{ pageBreakBefore: 'always', backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', color: '#2d3748' }}>
+        <div id="print-page-2" style={{ pageBreakBefore: 'always', backgroundColor: 'white', padding: '24px', border: '1px solid #e2e8f0', color: '#2d3748' }}>
           <h3 style={{ borderBottom: '2px solid #000', paddingBottom: '8px', marginBottom: '16px', color: '#000', fontSize: '16px' }}>{t('horoscopeCharts') || 'Horoscope Charts (Kattam)'}</h3>
           {chartDataError ? (
             <div style={{ padding: '24px', backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: '8px', color: '#856404' }}>
