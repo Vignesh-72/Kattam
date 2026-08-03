@@ -5,9 +5,9 @@ contextBridge.exposeInMainWorld('api', {
     run: (query, params) => ipcRenderer.invoke('db:run', query, params),
     all: (query, params) => ipcRenderer.invoke('db:all', query, params),
     get: (query, params) => ipcRenderer.invoke('db:get', query, params),
-    getSearchOptions: () => ipcRenderer.invoke('db:getSearchOptions'),
+    getSearchOptions: (selectedCaste) => ipcRenderer.invoke('db:getSearchOptions', selectedCaste),
   },
-  getSearchFilterOptions: () => ipcRenderer.invoke('get-search-filter-options'),
+  getSearchFilterOptions: (selectedCaste) => ipcRenderer.invoke('get-search-filter-options', selectedCaste),
   // Legacy: kept for compatibility. Prefer pickAndSaveImage for new photo uploads.
   saveImage: (data, fileName) => ipcRenderer.invoke('save-image', { data, fileName }),
   // MEM-02 / MEM-05: Opens native OS file dialog in main process.

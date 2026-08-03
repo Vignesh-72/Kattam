@@ -245,15 +245,19 @@ ipcMain.handle('db:get', (event, query, params) => {
   });
 });
 
-const fetchSearchFilterOptions = () => {
+const fetchSearchFilterOptions = (selectedCaste) => {
   return new Promise((resolve) => {
+    const subCasteSql = selectedCaste
+      ? "SELECT DISTINCT TRIM(subCaste) as val FROM candidates WHERE LOWER(TRIM(caste)) = LOWER(TRIM(?)) AND subCaste IS NOT NULL AND TRIM(subCaste) != '' ORDER BY val ASC"
+      : "SELECT DISTINCT TRIM(subCaste) as val FROM candidates WHERE subCaste IS NOT NULL AND TRIM(subCaste) != '' ORDER BY val ASC";
+
     const queries = {
-      castes: "SELECT DISTINCT TRIM(caste) as val FROM candidates WHERE caste IS NOT NULL AND TRIM(caste) != '' ORDER BY val ASC",
-      subCastes: "SELECT DISTINCT TRIM(subCaste) as val FROM candidates WHERE subCaste IS NOT NULL AND TRIM(subCaste) != '' ORDER BY val ASC",
-      stars: "SELECT DISTINCT TRIM(star) as val FROM candidates WHERE star IS NOT NULL AND TRIM(star) != '' ORDER BY val ASC",
-      raasis: "SELECT DISTINCT TRIM(raasi) as val FROM candidates WHERE raasi IS NOT NULL AND TRIM(raasi) != '' ORDER BY val ASC",
-      qualifications: "SELECT DISTINCT TRIM(qualification) as val FROM candidates WHERE qualification IS NOT NULL AND TRIM(qualification) != '' ORDER BY val ASC",
-      occupations: "SELECT DISTINCT TRIM(occupation) as val FROM candidates WHERE occupation IS NOT NULL AND TRIM(occupation) != '' ORDER BY val ASC"
+      castes: { sql: "SELECT DISTINCT TRIM(caste) as val FROM candidates WHERE caste IS NOT NULL AND TRIM(caste) != '' ORDER BY val ASC", params: [] },
+      subCastes: { sql: subCasteSql, params: selectedCaste ? [selectedCaste] : [] },
+      stars: { sql: "SELECT DISTINCT TRIM(star) as val FROM candidates WHERE star IS NOT NULL AND TRIM(star) != '' ORDER BY val ASC", params: [] },
+      raasis: { sql: "SELECT DISTINCT TRIM(raasi) as val FROM candidates WHERE raasi IS NOT NULL AND TRIM(raasi) != '' ORDER BY val ASC", params: [] },
+      qualifications: { sql: "SELECT DISTINCT TRIM(qualification) as val FROM candidates WHERE qualification IS NOT NULL AND TRIM(qualification) != '' ORDER BY val ASC", params: [] },
+      occupations: { sql: "SELECT DISTINCT TRIM(occupation) as val FROM candidates WHERE occupation IS NOT NULL AND TRIM(occupation) != '' ORDER BY val ASC", params: [] }
     };
 
     const results = {};
@@ -261,7 +265,8 @@ const fetchSearchFilterOptions = () => {
     let pending = keys.length;
 
     for (const key of keys) {
-      db.all(queries[key], [], (err, rows) => {
+      const q = queries[key];
+      db.all(q.sql, q.params, (err, rows) => {
         if (!err && rows) {
           results[key] = rows.map(r => r.val).filter(v => v && String(v).trim().length > 0);
         } else {
@@ -274,8 +279,8 @@ const fetchSearchFilterOptions = () => {
   });
 };
 
-ipcMain.handle('db:getSearchOptions', fetchSearchFilterOptions);
-ipcMain.handle('get-search-filter-options', fetchSearchFilterOptions);
+ipcMain.handle('db:getSearchOptions', (event, selectedCaste) => fetchSearchFilterOptions(selectedCaste));
+ipcMain.handle('get-search-filter-options', (event, selectedCaste) => fetchSearchFilterOptions(selectedCaste));
 
 // ─── IPC: MEM-01 Fix — Async image save (replaces blocking writeFileSync) ────
 ipcMain.handle('save-image', async (event, { data, fileName }) => {
