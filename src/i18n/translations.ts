@@ -52,9 +52,13 @@ export const translations = {
     communicationDetails: "Communication Details",
     contactNumber: "Contact Number",
     presentAddress: "Present Address",
-    candidatePhotos: "Candidate Photos",
-    photo1: "Photo 1",
-    photo2: "Photo 2",
+    candidatePhotos: "Candidate Photo",
+    candidatePhoto: "Candidate Photo",
+    photo1: "Photo",
+    selectPhoto: "Select Photo",
+    changePhoto: "Change Photo",
+    deletePhoto: "Delete Photo",
+    confirmDeletePhoto: "Are you sure you want to delete this photo?",
 
     // Select Options
     select: "Select...",
@@ -206,9 +210,13 @@ export const translations = {
     communicationDetails: "தொடர்பு விவரங்கள்",
     contactNumber: "தொடர்பு எண்",
     presentAddress: "தற்போதைய முகவரி",
-    candidatePhotos: "புகைப்படங்கள்",
-    photo1: "புகைப்படம் 1",
-    photo2: "புகைப்படம் 2",
+    candidatePhotos: "புகைப்படம்",
+    candidatePhoto: "புகைப்படம்",
+    photo1: "புகைப்படம்",
+    selectPhoto: "புகைப்படத்தை தேர்வு செய்",
+    changePhoto: "புகைப்படத்தை மாற்று",
+    deletePhoto: "புகைப்படத்தை நீக்கு",
+    confirmDeletePhoto: "இந்த புகைப்படத்தை நிச்சயமாக நீக்க விரும்புகிறீர்களா?",
 
     // Select Options
     select: "தேர்ந்தெடு...",

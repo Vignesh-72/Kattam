@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import KattamGrid from '../components/KattamGrid';
-import { Save, ArrowLeft, RefreshCw, Camera } from 'lucide-react';
+import { Save, ArrowLeft, RefreshCw, Camera, Trash2 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { calculateVedicChart } from '../utils/astrology';
 
@@ -146,7 +146,13 @@ export default function DataEntry() {
 
   const handlePhotoUpload = async (fieldName: string) => {
     const savedPath = await window.api.pickAndSaveImage(`${Date.now()}_photo.jpg`);
-    if (savedPath) setFormData((prev: any) => ({ ...prev, [fieldName]: savedPath }));
+    if (savedPath) setFormData((prev: any) => ({ ...prev, [fieldName]: savedPath, photo2: '' }));
+  };
+
+  const handleDeletePhoto = () => {
+    if (confirm(t('confirmDeletePhoto') || 'Are you sure you want to delete this photo?')) {
+      setFormData((prev: any) => ({ ...prev, photo1: '', photo2: '' }));
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -501,24 +507,25 @@ export default function DataEntry() {
           </div>
 
           <div id="photos" className="form-section">
-            <div className="form-section-title">{t('candidatePhotos')}</div>
-            {/* MEM-02/MEM-05: Replaced file input + FileReader + Base64 IPC with native dialog.
-                Clicking the button opens the OS file picker in the main process.
-                Only an ~80-byte file path crosses the IPC bridge. */}
+            <div className="form-section-title">{t('candidatePhoto') || t('candidatePhotos')}</div>
             <div className="form-grid">
-              <div className="form-group col-6">
-                <label>{t('photo1')}</label>
-                <button type="button" className="btn btn-secondary" style={{ width: '100%' }} onClick={() => handlePhotoUpload('photo1')}>
-                  <Camera size={16} style={{ marginRight: '6px' }} /> {formData.photo1 ? 'Change Photo 1' : 'Select Photo 1'}
-                </button>
-                {formData.photo1 && <img src={window.api.getLocalImage(formData.photo1)} alt="Preview 1" style={{ marginTop: '16px', height: '120px', borderRadius: '8px', objectFit: 'cover' }} />}
-              </div>
-              <div className="form-group col-6">
-                <label>{t('photo2')}</label>
-                <button type="button" className="btn btn-secondary" style={{ width: '100%' }} onClick={() => handlePhotoUpload('photo2')}>
-                  <Camera size={16} style={{ marginRight: '6px' }} /> {formData.photo2 ? 'Change Photo 2' : 'Select Photo 2'}
-                </button>
-                {formData.photo2 && <img src={window.api.getLocalImage(formData.photo2)} alt="Preview 2" style={{ marginTop: '16px', height: '120px', borderRadius: '8px', objectFit: 'cover' }} />}
+              <div className="form-group col-12">
+                <label>{t('candidatePhoto') || 'Candidate Photo'}</label>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', marginTop: '6px' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => handlePhotoUpload('photo1')}>
+                    <Camera size={16} style={{ marginRight: '6px' }} /> {formData.photo1 ? (t('changePhoto') || 'Change Photo') : (t('selectPhoto') || 'Select Photo')}
+                  </button>
+                  {formData.photo1 && (
+                    <button type="button" className="btn btn-secondary" style={{ backgroundColor: '#fff5f5', color: '#e53e3e', borderColor: '#feb2b2' }} onClick={handleDeletePhoto}>
+                      <Trash2 size={16} style={{ marginRight: '6px' }} /> {t('deletePhoto') || 'Delete Photo'}
+                    </button>
+                  )}
+                </div>
+                {formData.photo1 && (
+                  <div style={{ marginTop: '16px' }}>
+                    <img src={window.api.getLocalImage(formData.photo1)} alt="Candidate Preview" style={{ height: '150px', width: '130px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #cbd5e0' }} />
+                  </div>
+                )}
               </div>
             </div>
           </div>
