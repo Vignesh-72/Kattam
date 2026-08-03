@@ -48,10 +48,19 @@ export default function CandidateSearch() {
   const fetchFilterOptions = useCallback(async (selectedCaste?: string) => {
     try {
       let res = null;
-      if (window.api?.getSearchFilterOptions) {
-        res = await window.api.getSearchFilterOptions(selectedCaste);
-      } else if (window.api?.db?.getSearchOptions) {
-        res = await window.api.db.getSearchOptions(selectedCaste);
+      if (window.api?.db?.getSearchOptions) {
+        try {
+          res = await window.api.db.getSearchOptions(selectedCaste);
+        } catch (_) {
+          // Fallback to secondary IPC channel if primary channel throws
+        }
+      }
+      if (!res && window.api?.getSearchFilterOptions) {
+        try {
+          res = await window.api.getSearchFilterOptions(selectedCaste);
+        } catch (_) {
+          // Ignore if un-restarted electron process
+        }
       }
       if (res) {
         setDbOptions(prev => ({
