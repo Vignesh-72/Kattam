@@ -159,7 +159,7 @@ h1, h2, h3, h4, .app-title {
   text-decoration: none;
   font-weight: 500;
   font-size: var(--text-sm);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.15s ease-out, border-color 0.15s ease-out;
   border-bottom: 4px solid transparent;
   height: 100%;
 }
@@ -221,19 +221,20 @@ h1, h2, h3, h4, .app-title {
 
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .page-transition {
-  animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeIn 0.15s ease-out forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .main-content, .card, .btn, .nav-link, .form-control {
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -312,7 +313,7 @@ h1, h2, h3, h4, .app-title {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease-out;
 }
 
 .stat-card:hover {
@@ -383,7 +384,7 @@ h1, h2, h3, h4, .app-title {
   border-radius: var(--border-radius);
   padding: var(--space-4);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease-out;
   border: 1px solid var(--border-color);
 }
 
@@ -492,7 +493,7 @@ h1, h2, h3, h4, .app-title {
 
 .recent-arrow {
   color: var(--border-color);
-  transition: all 0.2s;
+  transition: transform 0.15s ease-out, color 0.15s ease-out;
 }
 
 .empty-state {
@@ -631,7 +632,7 @@ h1, h2, h3, h4, .app-title {
   border-radius: 8px;
   font-size: 0.9rem;
   font-family: inherit;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 0.15s ease-out, box-shadow 0.15s ease-out, background-color 0.15s ease-out;
   background-color: #f8fafc;
   color: var(--text-main);
   width: 100%;
@@ -659,7 +660,7 @@ select.form-control {
   font-weight: 500;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.15s ease-out, transform 0.15s ease-out, box-shadow 0.15s ease-out;
   display: inline-flex;
   align-items: center;
   justify-content: center;
