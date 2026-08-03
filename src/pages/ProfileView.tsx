@@ -98,11 +98,15 @@ export default function ProfileView() {
       }
     };
     return (
-      <div style={{ width: '240px', height: '240px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(4, 1fr)', border: '2px solid #000', backgroundColor: '#fff' }}>
-        <div style={{ gridColumn: '2 / 4', gridRow: '2 / 4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 600, color: '#000', border: '1px solid #718096', textAlign: 'center' }}>{title}</div>
+      <div style={{ width: '255px', height: '255px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(4, 1fr)', border: '2px solid #000', backgroundColor: '#fff' }}>
+        <div style={{ gridColumn: '2 / 4', gridRow: '2 / 4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.95rem', fontWeight: 700, color: '#000', border: '1px solid #718096', textAlign: 'center' }}>{title}</div>
         {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(house => (
-          <div key={house} style={{ border: '1px solid #718096', padding: '2px', gridArea: getGridArea(house), display: 'flex', flexDirection: 'column', fontSize: '0.68rem', lineHeight: 1.15, overflow: 'hidden' }}>
-            {(data[house] || []).map((g, i) => <div key={i} style={{ fontWeight: 'bold' }}>{t(g.trim() as any) || g.trim()}</div>)}
+          <div key={house} style={{ border: '1px solid #718096', padding: '2px', gridArea: getGridArea(house), display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: '0.60rem', lineHeight: 1.15, wordBreak: 'break-word', overflow: 'hidden' }}>
+            {(data[house] || []).map((g, i) => (
+              <div key={i} style={{ fontWeight: 600 }}>
+                {t(g.trim() as any) || g.trim()}
+              </div>
+            ))}
           </div>
         ))}
       </div>
@@ -137,13 +141,19 @@ export default function ProfileView() {
           </div>
         
         <div style={{ display: 'flex', gap: '16px', marginBottom: '14px' }}>
-          {candidate.photo1 && (
-            <div style={{ width: '100px', height: '125px', flexShrink: 0, border: '1px solid #cbd5e0', borderRadius: '4px', overflow: 'hidden' }}>
-              <img src={window.api.getLocalImage(candidate.photo1)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Candidate" />
-            </div>
-          )}
+          {/* Passport Sized Photo Box (35mm x 45mm ratio) */}
+          <div style={{ width: '105px', height: '135px', flexShrink: 0, border: '2px solid #cbd5e0', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#f7fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {candidate.photo1 ? (
+              <img src={window.api.getLocalImage(candidate.photo1)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Candidate Photo" />
+            ) : (
+              <div style={{ fontSize: '0.75rem', color: '#a0aec0', textAlign: 'center' }}>Photo</div>
+            )}
+          </div>
           <div style={{ flexGrow: 1 }}>
-            <h3 style={{ fontSize: '16px', marginBottom: '8px', color: '#000' }}>{candidate.fullName}</h3>
+            {/* Highlighted Full Name Header */}
+            <div style={{ fontSize: '19px', fontWeight: 800, color: '#000', marginBottom: '8px', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px' }}>
+              {t('fullName') || 'பெயர்'}: <span style={{ color: '#7A2E2E' }}>{candidate.fullName}</span>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px', fontSize: '12px' }}>
               <div><strong>{t('gender')}:</strong> {candidate.gender ? t(candidate.gender.toLowerCase() as any) || candidate.gender : ''}</div>
               <div><strong>{t('dob')}:</strong> {candidate.dob}</div>
