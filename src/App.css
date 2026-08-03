@@ -67,7 +67,8 @@
 
 html {
   min-height: 100%;
-  overflow-y: auto;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
   overflow-x: hidden;
 }
 
@@ -221,12 +222,13 @@ h1, h2, h3, h4, .app-title {
 
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .page-transition {
-  animation: fadeIn 0.15s ease-out forwards;
+  animation: fadeIn 0.12s ease-out forwards;
+  will-change: opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {

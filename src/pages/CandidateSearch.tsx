@@ -321,7 +321,7 @@ export default function CandidateSearch() {
   };
 
   return (
-    <div className="form-container page-transition" style={{ marginBottom: '40px' }}>
+    <div className="form-container page-transition" style={{ marginBottom: '40px', minHeight: '650px' }}>
       {/* Header & Dual Search Tabs */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 600 }}>{t('candidateDatabase')}</h2>
