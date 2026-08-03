@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import KattamGrid from '../components/KattamGrid';
-import { Save, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Save, ArrowLeft, RefreshCw, Camera } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { calculateVedicChart } from '../utils/astrology';
 
@@ -160,9 +160,7 @@ export default function DataEntry() {
             <ArrowLeft size={16} /> {t('back')}
           </button>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 700, fontFamily: 'var(--font-serif)', color: 'var(--text-main)' }}>{id ? t('editProfile') : t('newProfile')}</h2>
-          <button type="button" className="btn btn-primary" onClick={handleSave}>
-            <Save size={16} /> {t('saveProfile')}
-          </button>
+          <div style={{ width: '80px' }}></div>
         </div>
 
         {/* BUG-04: Removed onSubmit={handleSave}. Both save buttons are type="button"
@@ -233,13 +231,25 @@ export default function DataEntry() {
 
               <div className="form-group col-6">
                 <label>{t('motherTongue')}</label>
-                <select className="form-control" name="motherTongue" value={formData.motherTongue} onChange={handleChange}>
-                  <option value="Tamil">Tamil</option>
-                  <option value="Telugu">Telugu</option>
-                  <option value="Malayalam">Malayalam</option>
-                  <option value="Kannada">Kannada</option>
-                  <option value="Hindi">Hindi</option>
-                </select>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  name="motherTongue" 
+                  list="mother-tongue-list"
+                  value={formData.motherTongue} 
+                  onChange={handleChange} 
+                  placeholder="Type or select mother tongue..."
+                />
+                <datalist id="mother-tongue-list">
+                  <option value="Tamil" />
+                  <option value="Telugu" />
+                  <option value="Malayalam" />
+                  <option value="Kannada" />
+                  <option value="Hindi" />
+                  <option value="English" />
+                  <option value="Saurashtra" />
+                  <option value="Marathi" />
+                </datalist>
               </div>
               <div className="form-group col-6">
                 <label>{t('maritalStatus')}</label>
@@ -379,9 +389,16 @@ export default function DataEntry() {
                 <label>{t('weight')}</label>
                 <input type="text" className="form-control" name="weight" value={formData.weight || ''} onChange={handleChange} placeholder="e.g. 65kg" />
               </div>
-              <div className="form-group col-3">
+              <div className="form-group col-12" style={{ marginTop: '8px' }}>
                 <label>{t('expectation')}</label>
-                <input type="text" className="form-control" name="partnerComments" value={formData.partnerComments} onChange={handleChange} />
+                <textarea 
+                  className="form-control" 
+                  name="partnerComments" 
+                  rows={4}
+                  value={formData.partnerComments} 
+                  onChange={handleChange} 
+                  placeholder="Enter detailed expectations and requirements (multiple lines supported)..." 
+                />
               </div>
             </div>
           </div>
@@ -413,14 +430,14 @@ export default function DataEntry() {
               <div className="form-group col-6">
                 <label>{t('photo1')}</label>
                 <button type="button" className="btn btn-secondary" style={{ width: '100%' }} onClick={() => handlePhotoUpload('photo1')}>
-                  📷 {formData.photo1 ? 'Change Photo 1' : 'Select Photo 1'}
+                  <Camera size={16} style={{ marginRight: '6px' }} /> {formData.photo1 ? 'Change Photo 1' : 'Select Photo 1'}
                 </button>
                 {formData.photo1 && <img src={window.api.getLocalImage(formData.photo1)} alt="Preview 1" style={{ marginTop: '16px', height: '120px', borderRadius: '8px', objectFit: 'cover' }} />}
               </div>
               <div className="form-group col-6">
                 <label>{t('photo2')}</label>
                 <button type="button" className="btn btn-secondary" style={{ width: '100%' }} onClick={() => handlePhotoUpload('photo2')}>
-                  📷 {formData.photo2 ? 'Change Photo 2' : 'Select Photo 2'}
+                  <Camera size={16} style={{ marginRight: '6px' }} /> {formData.photo2 ? 'Change Photo 2' : 'Select Photo 2'}
                 </button>
                 {formData.photo2 && <img src={window.api.getLocalImage(formData.photo2)} alt="Preview 2" style={{ marginTop: '16px', height: '120px', borderRadius: '8px', objectFit: 'cover' }} />}
               </div>
