@@ -124,10 +124,15 @@ export default function CandidateSearch() {
     }
   }, []);
 
-  // Fetch initial distinct database filter options on component mount
+  // Fetch initial distinct database filter options once (deferred to keep initial scroll 100% smooth)
   useEffect(() => {
-    fetchFilterOptions();
-  }, [fetchFilterOptions]);
+    if (dbOptions.castes.length === 0 && dbOptions.maritalStatuses.length === 0) {
+      const timer = setTimeout(() => {
+        fetchFilterOptions();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [fetchFilterOptions, dbOptions]);
 
   // Options derived strictly from database queries
   const casteOptions = useMemo(() => dbOptions.castes || [], [dbOptions.castes]);
@@ -667,23 +672,7 @@ export default function CandidateSearch() {
       {/* Candidate Card Results Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px', marginBottom: '32px' }}>
         {candidates.map(candidate => (
-          <div
-            key={candidate.id}
-            style={{
-              backgroundColor: 'var(--card-bg)',
-              borderRadius: '12px',
-              padding: '24px',
-              border: '1px solid var(--border-color)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-              transition: 'transform 0.15s ease-out, box-shadow 0.15s ease-out',
-              cursor: 'default'
-            }} 
-            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.06)'; }}
-            onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.03)'; }}
-          >
+          <div key={candidate.id} className="candidate-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                 <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: 'var(--primary-color)', color: 'var(--text-on-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: 'bold' }}>
