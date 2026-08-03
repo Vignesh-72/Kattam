@@ -3,6 +3,8 @@ const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
+
 // ─── PERF-03: V8 Aggressive GC for 2GB RAM systems ───────────────────────────
 // Forces Chromium to cap heap at 256MB and aggressively GC before Windows
 // pages V8 heap to pagefile.sys (which causes 1–3s freeze spikes on slow HDDs).
@@ -13,10 +15,10 @@ app.commandLine.appendSwitch('disable-renderer-backgrounding');
 app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('force-color-profile', 'srgb');
 
-// Disable GPU sandbox for machines with integrated Intel HD Graphics
-if (process.platform === 'win32') {
-  app.commandLine.appendSwitch('disable-gpu-sandbox');
-}
+// Disable hardware GPU acceleration to eliminate viz_main_impl crashes on integrated/Linux GPUs
+app.commandLine.appendSwitch('disable-gpu');
+app.commandLine.appendSwitch('disable-software-rasterizer');
+app.commandLine.appendSwitch('disable-gpu-sandbox');
 
 let mainWindow;
 let db;
