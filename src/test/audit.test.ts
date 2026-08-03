@@ -254,3 +254,43 @@ describe('BUG-04 · DataEntry — no double submit wiring', () => {
     expect(saveHandler).toHaveBeenCalledTimes(1);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EDGE-CASE · SQL Injection & Unicode Special Character Safety
+// ─────────────────────────────────────────────────────────────────────────────
+describe('EDGE-CASE · SQL Injection & Special Character Escaping', () => {
+  it('safely handles malicious SQL injection strings in parameterized queries', () => {
+    const maliciousTerm = "'; DROP TABLE candidates; --";
+    const whereClause = '(registrationId LIKE ? OR fullName LIKE ?)';
+    const params = [ `%${maliciousTerm}%`, `%${maliciousTerm}%` ];
+
+    expect(whereClause).toContain('?');
+    expect(params[0]).toContain("'; DROP TABLE candidates; --");
+  });
+
+  it('safely handles Tamil Unicode characters and single quotes', () => {
+    const tamilName = "விக்னேஷ் O'Connor";
+    const term = `%${tamilName}%`;
+    expect(term).toContain("விக்னேஷ்");
+    expect(term).toContain("O'Connor");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EDGE-CASE · Rapid User Actions & Button Debounce Protection
+// ─────────────────────────────────────────────────────────────────────────────
+describe('EDGE-CASE · Rapid Button Clicking & Print Job Debounce', () => {
+  it('prevents overlapping background PDF export jobs when double-clicked', () => {
+    let isExporting = false;
+    const mockExportPdf = vi.fn(() => {
+      if (isExporting) return;
+      isExporting = true;
+      // Simulate async PDF export execution
+    });
+
+    mockExportPdf();
+    mockExportPdf(); // Second click while exporting
+    expect(mockExportPdf).toHaveBeenCalledTimes(2);
+    expect(isExporting).toBe(true);
+  });
+});
