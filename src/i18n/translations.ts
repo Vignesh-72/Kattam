@@ -2,7 +2,7 @@ export type Language = 'en' | 'ta';
 
 export const translations = {
   en: {
-    // App / Sidebar
+    // App / Navigation
     kattamMatrimony: "Kattam Matrimony",
     subtitle: "Matrimony Information Center",
     dashboard: "Dashboard",
@@ -21,7 +21,7 @@ export const translations = {
     recentlyAdded: "Recently Added",
     viewAll: "View All",
     noProfiles: "No profiles registered yet.",
-    
+
     // Data Entry
     editProfile: "Edit Candidate Profile",
     newProfile: "New Candidate Registration",
@@ -37,12 +37,12 @@ export const translations = {
     placeOfBirth: "Place of Birth",
     nativity: "Nativity",
     horoscopeDetails: "Horoscope & Astrology Details",
+    horoscopeCharts: "Horoscope Charts (Kattam)",
     caste: "Caste",
     subCaste: "Sub Caste",
     gothram: "Gothram",
     star: "Star / Nakshatram",
     raasi: "Raasi / Moon Sign",
-    horoscopeCharts: "Horoscope Charts (Kattam)",
     rasiTitle: "Rasi",
     amsamTitle: "Amsam",
     educationOccupation: "Education & Occupation",
@@ -55,7 +55,7 @@ export const translations = {
     candidatePhotos: "Candidate Photos",
     photo1: "Photo 1",
     photo2: "Photo 2",
-    
+
     // Select Options
     select: "Select...",
     male: "Male",
@@ -64,7 +64,7 @@ export const translations = {
     married: "Married",
     divorced: "Divorced",
     widowed: "Widowed",
-    
+
     // Search
     candidateDatabase: "Search Candidates",
     searchPlaceholder: "Search by ID, Name, Phone, Caste, Raasi...",
@@ -74,8 +74,8 @@ export const translations = {
     actions: "Actions",
     noCandidates: "No candidates found.",
     confirmDelete: "Are you sure you want to delete this candidate?",
-    
-    // Profile
+
+    // Profile & Family
     candidateProfile: "Candidate Profile",
     printProfile: "Print Profile",
     exportPdf: "Export PDF",
@@ -106,7 +106,6 @@ export const translations = {
     assets: "Property / Assets",
     workLocation: "Work Location",
     expectation: "Expectations",
-    // NOTE: complexion and height intentionally defined once here (BUG-08: removed duplicate at L91/L94)
     physicalDetails: "Physical Details",
     otherDetails: "Other Details",
     Sun: "Sun",
@@ -120,10 +119,9 @@ export const translations = {
     Ketu: "Ketu",
     Lagna: "Lagna",
     Ascendant: "Ascendant",
-    // NOTE: rasiTitle and amsamTitle intentionally defined once here (BUG-08: removed duplicate at L46/L47)
   },
   ta: {
-    // App / Sidebar
+    // App / Navigation
     kattamMatrimony: "கட்டம் மேட்ரிமோனி",
     subtitle: "திருமண தகவல் மையம்",
     dashboard: "முகப்பு",
@@ -142,7 +140,7 @@ export const translations = {
     recentlyAdded: "சமீபத்திய பதிவுகள்",
     viewAll: "முழுவதும் காண்க",
     noProfiles: "எந்த பதிவும் இல்லை.",
-    
+
     // Data Entry
     editProfile: "வரன் விவரங்களைத் திருத்து",
     newProfile: "புதிய வரன் பதிவு",
@@ -158,6 +156,7 @@ export const translations = {
     placeOfBirth: "பிறந்த இடம்",
     nativity: "பூர்வீகம்",
     horoscopeDetails: "ஜாதக விவரங்கள்",
+    horoscopeCharts: "ஜாதக கட்டம்",
     caste: "இனம் / சாதி",
     subCaste: "உட்பிரிவு",
     gothram: "கோத்திரம்",
@@ -169,23 +168,13 @@ export const translations = {
     qualification: "கல்வித் தகுதி",
     occupation: "வேலை",
     income: "மாத வருமானம்",
-    familyDetails: "குடும்ப விவரம்",
-    fatherName: "தந்தை பெயர்",
-    fatherJob: "தந்தை தொழில்",
-    motherName: "தாய் பெயர்",
-    motherJob: "தாய் தொழில்",
-    brothers: "சகோதரர்கள் எண்ணிக்கை",
-    brothersMarried: "மணமானவர்கள்",
-    sisters: "சகோதரிகள் எண்ணிக்கை",
-    sistersMarried: "மணமானவர்கள்",
-    physicalEducation: "கல்வி மற்றும் வேலை",
     communicationDetails: "தொடர்பு விவரங்கள்",
     contactNumber: "தொடர்பு எண்",
     presentAddress: "தற்போதைய முகவரி",
     candidatePhotos: "புகைப்படங்கள்",
     photo1: "புகைப்படம் 1",
     photo2: "புகைப்படம் 2",
-    
+
     // Select Options
     select: "தேர்ந்தெடு...",
     male: "ஆண்",
@@ -194,7 +183,7 @@ export const translations = {
     married: "திருமணமானவர்",
     divorced: "விவாகரத்தானவர்",
     widowed: "துணையை இழந்தவர்",
-    
+
     // Search
     candidateDatabase: "வரன்களைத் தேடுக",
     searchPlaceholder: "எண், பெயர், போன், சாதி, ராசி வைத்து தேடுக...",
@@ -204,14 +193,20 @@ export const translations = {
     actions: "செயல்கள்",
     noCandidates: "எந்த வரனும் காணப்படவில்லை.",
     confirmDelete: "இந்த வரன் விவரங்களை நிச்சயமாக நீக்க விரும்புகிறீர்களா?",
-    
-    // Profile
+
+    // Profile & Family
     candidateProfile: "வரன் விவரங்கள்",
     printProfile: "அச்சிடு",
     exportPdf: "PDF ஏற்றுமதி",
     familyDetails: "குடும்ப விவரங்கள்",
     fatherName: "தந்தை பெயர்",
+    fatherJob: "தந்தை தொழில்",
     motherName: "தாய் பெயர்",
+    motherJob: "தாய் தொழில்",
+    brothers: "சகோதரர்கள் எண்ணிக்கை",
+    brothersMarried: "மணமானவர்கள்",
+    sisters: "சகோதரிகள் எண்ணிக்கை",
+    sistersMarried: "மணமானவர்கள்",
     physicalEducation: "உடல் மற்றும் கல்வி",
     height: "உயரம்",
     weight: "எடை",
@@ -230,7 +225,6 @@ export const translations = {
     assets: "சொத்து விவரம்",
     workLocation: "பணிபுரியும் இடம்",
     expectation: "எதிர்பார்ப்பு",
-    // NOTE: complexion and height defined once (BUG-08: removed duplicates at L221/L236)
     physicalDetails: "உடல் நலம் & உணவு விவரம்",
     otherDetails: "இதர விவரங்கள்",
     Sun: "சூரியன்",
@@ -244,6 +238,5 @@ export const translations = {
     Ketu: "கேது",
     Lagna: "லக்னம்",
     Ascendant: "லக்னம்",
-    // NOTE: rasiTitle and amsamTitle defined once (BUG-08: removed duplicates at L168/L169)
   }
 };
