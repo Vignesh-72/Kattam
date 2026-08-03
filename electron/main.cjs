@@ -340,7 +340,8 @@ const fetchSearchFilterOptions = (filterState = {}) => {
       jobPlaces: 'placeOfJob',
       diets: 'diet',
       partnerJobReqs: 'partnerJobReq',
-      partnerHoroscopeReqs: 'partnerHoroscopeReq'
+      partnerHoroscopeReqs: 'partnerHoroscopeReq',
+      maritalStatuses: 'maritalStatus'
     };
 
     const buildQueryForField = (targetCol) => {

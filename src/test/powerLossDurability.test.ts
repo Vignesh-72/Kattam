@@ -177,7 +177,7 @@ describe('POWER-LOSS & DATA DURABILITY TEST SUITE (TC-PWR-01 to TC-PWR-05)', () 
       if (file.startsWith('kattam_backup_') && file.endsWith('.db')) {
         const filePath = path.join(backupDir, file);
         const stats = fs.statSync(filePath);
-        if (now - stats.mtimeMs > SEVEN_DAYS_MS) {
+        if (now - stats.mtimeMs >= SEVEN_DAYS_MS - 1000) {
           try { fs.unlinkSync(filePath); } catch (_) {}
         }
       }

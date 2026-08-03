@@ -19,6 +19,7 @@ interface SearchOptions {
   diets: string[];
   partnerJobReqs: string[];
   partnerHoroscopeReqs: string[];
+  maritalStatuses: string[];
 }
 
 const initialFilterState = {
@@ -54,7 +55,7 @@ export default function CandidateSearch() {
   const [dbOptions, setDbOptions] = useState<SearchOptions>({
     castes: [], subCastes: [], gothrams: [], stars: [], raasis: [], laknams: [],
     qualifications: [], occupations: [], religions: [], motherTongues: [], nativities: [], jobPlaces: [],
-    diets: [], partnerJobReqs: [], partnerHoroscopeReqs: []
+    diets: [], partnerJobReqs: [], partnerHoroscopeReqs: [], maritalStatuses: []
   });
   
   const [page, setPage] = useState(1);
@@ -97,6 +98,7 @@ export default function CandidateSearch() {
           diets: res.diets || [],
           partnerJobReqs: res.partnerJobReqs || [],
           partnerHoroscopeReqs: res.partnerHoroscopeReqs || [],
+          maritalStatuses: res.maritalStatuses || [],
         });
       }
     } catch (err) {
@@ -125,6 +127,7 @@ export default function CandidateSearch() {
   const dietOptions = useMemo(() => dbOptions.diets || [], [dbOptions.diets]);
   const partnerJobReqOptions = useMemo(() => dbOptions.partnerJobReqs || [], [dbOptions.partnerJobReqs]);
   const partnerHoroscopeReqOptions = useMemo(() => dbOptions.partnerHoroscopeReqs || [], [dbOptions.partnerHoroscopeReqs]);
+  const maritalStatusOptions = useMemo(() => dbOptions.maritalStatuses || [], [dbOptions.maritalStatuses]);
 
   // Triggers search query execution ONLY when user clicks Search / presses Enter
   const handleStandardSearchSubmit = (e?: React.FormEvent) => {
@@ -134,11 +137,14 @@ export default function CandidateSearch() {
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({
-      ...prev,
+    const updated = {
+      ...filters,
       [key]: value,
       ...(key === 'caste' ? { subCaste: '' } : {})
-    }));
+    };
+    setFilters(updated);
+    setActiveFilters(updated);
+    setPage(1);
   };
 
   const handleApplyFilters = (e?: React.FormEvent) => {
@@ -414,11 +420,10 @@ export default function CandidateSearch() {
               <div>
                 <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('maritalStatus')}</label>
                 <select className="form-control" value={filters.maritalStatus} onChange={e => handleFilterChange('maritalStatus', e.target.value)}>
-                  <option value="">{t('select')}</option>
-                  <option value="Unmarried">{t('unmarried')}</option>
-                  <option value="Married">{t('married')}</option>
-                  <option value="Divorced">{t('divorced')}</option>
-                  <option value="Widowed">{t('widowed')}</option>
+                  <option value="">{t('allMaritalStatuses') || t('allMaritalStatus') || "All Marital Statuses"}</option>
+                  {maritalStatusOptions.map(ms => (
+                    <option key={ms} value={ms}>{ms}</option>
+                  ))}
                 </select>
               </div>
 
