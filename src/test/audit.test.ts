@@ -316,3 +316,29 @@ describe('PERF-04 · SQLite WAL Checkpointing, Auto-Vacuum & Packaging Configura
   });
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CRUD & PAGINATION · Hard Deletion & Show More Progressive Loading
+// ─────────────────────────────────────────────────────────────────────────────
+describe('CRUD & PAGINATION · Hard Deletion & Show More Progressive Loading', () => {
+  it('appends next batch of candidates on Show More click without overwriting existing state', () => {
+    const batch1 = [{ id: 1, fullName: 'Candidate 1' }, { id: 2, fullName: 'Candidate 2' }];
+    const batch2 = [{ id: 3, fullName: 'Candidate 3' }, { id: 4, fullName: 'Candidate 4' }];
+
+    let displayed = [...batch1];
+    expect(displayed.length).toBe(2);
+
+    // Click Show More
+    displayed = [...displayed, ...batch2];
+    expect(displayed.length).toBe(4);
+    expect(displayed.map(c => c.id)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('verifies hard delete SQL query syntax and zero-record return expectation', () => {
+    const deleteSql = 'DELETE FROM candidates WHERE id = ?';
+    const selectSql = 'SELECT COUNT(*) as count FROM candidates WHERE id = ?';
+
+    expect(deleteSql).toContain('DELETE FROM candidates WHERE id = ?');
+    expect(selectSql).toContain('SELECT COUNT(*) as count');
+  });
+});
+

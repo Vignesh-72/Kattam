@@ -60,6 +60,7 @@ export default function CandidateSearch() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const PAGE_SIZE = 30;
@@ -156,7 +157,7 @@ export default function CandidateSearch() {
     setPage(1);
   };
 
-  const loadCandidates = useCallback(async () => {
+  const loadCandidates = useCallback(async (targetPage: number, isAppend: boolean) => {
     const CARD_COLS = 'id, registrationId, fullName, gender, caste, contactNumber';
     let countQuery = 'SELECT COUNT(*) as count FROM candidates';
     let dataQuery = `SELECT ${CARD_COLS} FROM candidates`;
@@ -174,7 +175,6 @@ export default function CandidateSearch() {
         }
       }
     } else {
-      // Comprehensive Advanced Multi-Criteria Filter Query Builder
       if (activeFilters.gender) {
         whereConditions.push('LOWER(gender) = LOWER(?)');
         countParams.push(activeFilters.gender);
@@ -282,35 +282,45 @@ export default function CandidateSearch() {
       dataQuery += clause;
     }
 
-    dataQuery += ' ORDER BY createdAt DESC LIMIT ? OFFSET ?';
-    dataParams.push(PAGE_SIZE, (page - 1) * PAGE_SIZE);
+    dataQuery += ' ORDER BY id DESC LIMIT ? OFFSET ?';
+    dataParams.push(PAGE_SIZE, (targetPage - 1) * PAGE_SIZE);
 
     try {
       if (window.api?.db?.get) {
+        setLoadingMore(true);
         const countResult = await window.api.db.get(countQuery, countParams);
         const total = countResult ? countResult.count : 0;
         setTotalCount(total);
         setTotalPages(Math.max(1, Math.ceil(total / PAGE_SIZE)));
 
-        const rows = await window.api.db.all(dataQuery, dataParams);
-        setCandidates(rows || []);
+        const rows = (await window.api.db.all(dataQuery, dataParams)) || [];
+        setCandidates(prev => isAppend ? [...prev, ...rows] : rows);
       }
     } catch (e) {
       console.error('[CandidateSearch] Query Execution Error:', e);
+    } finally {
+      setLoadingMore(false);
     }
-  }, [searchMode, activeSearchTerm, activeFilters, page]);
+  }, [searchMode, activeSearchTerm, activeFilters]);
 
   useEffect(() => {
-    loadCandidates();
-  }, [loadCandidates]);
+    loadCandidates(page, page > 1);
+  }, [searchMode, activeSearchTerm, activeFilters, page, loadCandidates]);
+
+  const handleShowMore = () => {
+    setPage(p => p + 1);
+  };
 
   const handleDelete = async (id: number) => {
     if (confirm(t('confirmDelete'))) {
-      if (window.api?.db?.run) {
+      if (window.api?.deleteCandidate) {
+        await window.api.deleteCandidate(id);
+      } else if (window.api?.db?.run) {
         await window.api.db.run('DELETE FROM candidates WHERE id = ?', [id]);
-        loadCandidates();
-        fetchFilterOptions(filters.caste);
       }
+      setPage(1);
+      loadCandidates(1, false);
+      fetchFilterOptions(filters.caste);
     }
   };
 
@@ -683,33 +693,37 @@ export default function CandidateSearch() {
         )}
       </div>
 
-      {/* Pagination Footer Controls */}
-      {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px', marginBottom: '40px', borderTop: '1px solid var(--border-color)', paddingTop: '20px', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Showing {((page - 1) * PAGE_SIZE) + 1} to {Math.min(page * PAGE_SIZE, totalCount)} of {totalCount} profiles
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button 
-              className="btn btn-secondary" 
-              style={{ padding: '8px 12px', opacity: page === 1 ? 0.5 : 1, cursor: page === 1 ? 'not-allowed' : 'pointer' }}
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              <ChevronLeft size={18} /> Previous
-            </button>
-            <div style={{ display: 'flex', alignItems: 'center', padding: '0 12px', fontWeight: 'bold' }}>
-              Page {page} of {totalPages}
-            </div>
-            <button 
-              className="btn btn-secondary" 
-              style={{ padding: '8px 12px', opacity: page === totalPages ? 0.5 : 1, cursor: page === totalPages ? 'not-allowed' : 'pointer' }}
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-            >
-              Next <ChevronRight size={18} />
-            </button>
-          </div>
+      {/* Progressive "Show More" Load Control */}
+      {candidates.length < totalCount && (
+        <div style={{ textAlign: 'center', marginTop: '36px', marginBottom: '40px' }}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={loadingMore}
+            onClick={handleShowMore}
+            style={{
+              padding: '14px 36px',
+              fontSize: '1rem',
+              fontWeight: 600,
+              borderRadius: '10px',
+              boxShadow: '0 4px 12px rgba(122, 46, 46, 0.2)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}
+          >
+            {loadingMore ? (
+              <>
+                <RefreshCw size={18} className="spin-animation" style={{ animation: 'spin 1s linear infinite' }} />
+                {t('loadingMore')}
+              </>
+            ) : (
+              <>
+                <RefreshCw size={18} />
+                {t('showMore')} ({candidates.length} / {totalCount})
+              </>
+            )}
+          </button>
         </div>
       )}
     </div>

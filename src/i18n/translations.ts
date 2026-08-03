@@ -99,6 +99,8 @@ export const translations = {
     basicDemographics: "Basic & Demographics",
     communityHoroscope: "Community & Horoscope",
     educationCareer: "Education & Career",
+    showMore: "Show More Profiles",
+    loadingMore: "Loading More Profiles...",
 
     // Profile & Family
     candidateProfile: "Candidate Profile",
@@ -243,6 +245,8 @@ export const translations = {
     basicDemographics: "அடிப்படை விவரங்கள்",
     communityHoroscope: "சமூகம் & ஜாதகம்",
     educationCareer: "கல்வி & வேலை",
+    showMore: "மேலும் வரன்களைக் காட்டு",
+    loadingMore: "மேலும் வரன்கள் ஏற்றப்படுகின்றன...",
 
     // Profile & Family
     candidateProfile: "வரன் விவரங்கள்",

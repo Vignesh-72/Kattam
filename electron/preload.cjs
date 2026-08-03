@@ -13,5 +13,7 @@ contextBridge.exposeInMainWorld('api', {
   // MEM-02 / MEM-05: Opens native OS file dialog in main process.
   // ONLY a file path string (~80 bytes) crosses the IPC bridge — zero Base64 overhead.
   pickAndSaveImage: (fileName) => ipcRenderer.invoke('pick-and-save-image', fileName),
+  deleteCandidate: (id) => ipcRenderer.invoke('delete-candidate', id),
+  vacuumDb: () => ipcRenderer.invoke('db-vacuum'),
   getLocalImage: (filePath) => `local-file://${filePath}`,
 });

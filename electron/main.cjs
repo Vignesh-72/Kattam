@@ -329,6 +329,27 @@ ipcMain.handle('pick-and-save-image', async (event, fileName) => {
   return dest;
 });
 
+// ─── IPC: Hard Delete Candidate & Remove Photo Files from Disk ─────────────────
+ipcMain.handle('delete-candidate', async (event, id) => {
+  return new Promise((resolve) => {
+    if (!db) return resolve({ success: false, error: 'Database not initialized' });
+    db.get('SELECT photo1, photo2 FROM candidates WHERE id = ?', [id], async (err, row) => {
+      if (row) {
+        if (row.photo1 && fs.existsSync(row.photo1)) {
+          try { await fs.promises.unlink(row.photo1); } catch (_) {}
+        }
+        if (row.photo2 && fs.existsSync(row.photo2)) {
+          try { await fs.promises.unlink(row.photo2); } catch (_) {}
+        }
+      }
+      db.run('DELETE FROM candidates WHERE id = ?', [id], function (deleteErr) {
+        if (deleteErr) resolve({ success: false, error: deleteErr.message });
+        else resolve({ success: true, changes: this.changes });
+      });
+    });
+  });
+});
+
 // ─── IPC: Manual / Maintenance Database Vacuum Trigger ────────────────────────
 ipcMain.handle('db-vacuum', async () => {
   return new Promise((resolve) => {
