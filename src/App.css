@@ -755,10 +755,10 @@ select.form-control {
   .main-content {
     padding: 0;
     margin: 0;
-    background-color: white;
+    background-color: white !important;
   }
   .app-layout {
-    display: block;
+    display: block !important;
   }
   @page {
     size: A4;
@@ -769,5 +769,18 @@ select.form-control {
     max-width: 100%;
     padding: 0;
     border: none;
+  }
+  /* Enforce clean page break before page 2 */
+  .print-page-break {
+    break-before: page !important;
+    page-break-before: always !important;
+    display: block !important;
+    clear: both !important;
+    margin-top: 0 !important;
+  }
+  /* Prevent Kattam grids from splitting across pages */
+  .kattam-grid, .kattam-container {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }

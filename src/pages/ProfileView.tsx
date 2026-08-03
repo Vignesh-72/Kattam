@@ -210,7 +210,7 @@ export default function ProfileView() {
         {/* Charts Page */}
         {/* Visual separator for UI, acts as page break for print */}
         <div className="no-print" style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '0 32px' }}></div>
-        <div id="print-page-2" style={{ pageBreakBefore: 'always', backgroundColor: 'white', padding: '32px', color: '#2d3748' }}>
+        <div id="print-page-2" className="print-page-break" style={{ backgroundColor: 'white', padding: '32px', color: '#2d3748' }}>
           <h3 style={{ borderBottom: '2px solid #000', paddingBottom: '8px', marginBottom: '16px', color: '#000', fontSize: '16px' }}>{t('horoscopeCharts') || 'Horoscope Charts (Kattam)'}</h3>
           {chartDataError ? (
             <div style={{ padding: '24px', backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: '8px', color: '#856404' }}>
