@@ -770,6 +770,23 @@ select.form-control {
     padding: 0;
     border: none;
   }
+  /* Neutralize parent container box model during print to allow page fragmentation */
+  #print-area {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+  #print-page-1 {
+    background-color: white !important;
+    padding: 0 !important;
+  }
+  #print-page-2 {
+    background-color: white !important;
+    padding: 0 !important;
+  }
   /* Enforce clean page break before page 2 */
   .print-page-break {
     break-before: page !important;
