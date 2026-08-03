@@ -669,20 +669,7 @@ export default function CandidateSearch() {
         {candidates.map(candidate => (
           <div
             key={candidate.id}
-            style={{
-              backgroundColor: 'var(--card-bg)',
-              borderRadius: '12px',
-              padding: '24px',
-              border: '1px solid var(--border-color)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-              transition: 'transform 0.15s ease-out, box-shadow 0.15s ease-out',
-              cursor: 'default'
-            }} 
-            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.06)'; }}
-            onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.03)'; }}
+            className="candidate-card"
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
