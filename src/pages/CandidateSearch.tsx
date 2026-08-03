@@ -395,7 +395,7 @@ export default function CandidateSearch() {
           {/* Section 1: Basic & Demographics */}
           <div style={{ marginBottom: '20px' }}>
             <h4 style={{ fontSize: '0.9rem', color: 'var(--primary-color)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
-              <UserCheck size={16} /> Basic & Demographics
+              <UserCheck size={16} /> {t('basicDemographics')}
             </h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
               {/* Gender */}
@@ -486,7 +486,7 @@ export default function CandidateSearch() {
           {/* Section 2: Community & Horoscope */}
           <div style={{ marginBottom: '20px' }}>
             <h4 style={{ fontSize: '0.9rem', color: 'var(--primary-color)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
-              <Compass size={16} /> Community & Horoscope
+              <Compass size={16} /> {t('communityHoroscope')}
             </h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
               {/* Caste */}
@@ -560,7 +560,7 @@ export default function CandidateSearch() {
           {/* Section 3: Education & Career */}
           <div style={{ marginBottom: '20px' }}>
             <h4 style={{ fontSize: '0.9rem', color: 'var(--primary-color)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
-              <Briefcase size={16} /> Education & Career
+              <Briefcase size={16} /> {t('educationCareer')}
             </h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
               {/* Qualification */}
@@ -593,71 +593,6 @@ export default function CandidateSearch() {
                   {jobPlaceOptions.map(jp => (
                     <option key={jp} value={jp}>{jp}</option>
                   ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 4: Lifestyle & Expectations (Dynamic SQLite data populated options) */}
-          <div style={{ marginBottom: '20px' }}>
-            <h4 style={{ fontSize: '0.9rem', color: 'var(--primary-color)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid var(--border-color)', paddingBottom: '6px' }}>
-              <Heart size={16} /> Lifestyle & Expectations
-            </h4>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
-              {/* Diet */}
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('diet')}</label>
-                <select className="form-control" value={filters.diet} onChange={e => handleFilterChange('diet', e.target.value)}>
-                  <option value="">{t('allDiets') || "All Diets"}</option>
-                  {dietOptions.length > 0 ? (
-                    dietOptions.map(d => (
-                      <option key={d} value={d}>{d}</option>
-                    ))
-                  ) : (
-                    <>
-                      <option value="Vegetarian">{t('vegetarian')}</option>
-                      <option value="Non-Vegetarian">{t('nonVegetarian')}</option>
-                      <option value="Eggetarian">{t('eggetarian')}</option>
-                    </>
-                  )}
-                </select>
-              </div>
-
-              {/* Partner Job Requirement */}
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('partnerJobReq')}</label>
-                <select className="form-control" value={filters.partnerJobReq} onChange={e => handleFilterChange('partnerJobReq', e.target.value)}>
-                  <option value="">{t('select')}</option>
-                  {partnerJobReqOptions.length > 0 ? (
-                    partnerJobReqOptions.map(pj => (
-                      <option key={pj} value={pj}>{pj}</option>
-                    ))
-                  ) : (
-                    <>
-                      <option value="Required">{t('required')}</option>
-                      <option value="Not required">{t('notRequired')}</option>
-                      <option value="Optional">{t('optional')}</option>
-                    </>
-                  )}
-                </select>
-              </div>
-
-              {/* Partner Horoscope Requirement */}
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('partnerHoroscopeReq')}</label>
-                <select className="form-control" value={filters.partnerHoroscopeReq} onChange={e => handleFilterChange('partnerHoroscopeReq', e.target.value)}>
-                  <option value="">{t('select')}</option>
-                  {partnerHoroscopeReqOptions.length > 0 ? (
-                    partnerHoroscopeReqOptions.map(ph => (
-                      <option key={ph} value={ph}>{ph}</option>
-                    ))
-                  ) : (
-                    <>
-                      <option value="Required">{t('required')}</option>
-                      <option value="Not required">{t('notRequired')}</option>
-                      <option value="Optional">{t('optional')}</option>
-                    </>
-                  )}
                 </select>
               </div>
             </div>

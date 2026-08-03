@@ -94,6 +94,11 @@ export const translations = {
     allNativities: "All Nativities",
     allJobPlaces: "All Job Locations",
     allDiets: "All Diets",
+    laknam: "Laknam",
+    placeOfJob: "Place of Job",
+    basicDemographics: "Basic & Demographics",
+    communityHoroscope: "Community & Horoscope",
+    educationCareer: "Education & Career",
 
     // Profile & Family
     candidateProfile: "Candidate Profile",
@@ -233,6 +238,11 @@ export const translations = {
     allNativities: "எல்லா சொந்த ஊரும்",
     allJobPlaces: "எல்லா பணி இடமும்",
     allDiets: "எல்லா உணவுப் பழக்கமும்",
+    laknam: "லக்னம்",
+    placeOfJob: "பணி இடம்",
+    basicDemographics: "அடிப்படை விவரங்கள்",
+    communityHoroscope: "சமூகம் & ஜாதகம்",
+    educationCareer: "கல்வி & வேலை",
 
     // Profile & Family
     candidateProfile: "வரன் விவரங்கள்",
