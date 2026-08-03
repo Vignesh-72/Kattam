@@ -41,13 +41,11 @@ export default function ProfileView() {
     window.print();
   };
 
-  const handleExportPDF = async (company: 'company1' | 'company2' = 'company1') => {
-    setSelectedCompany(company);
+  const handleExportPDF = async () => {
     const originalScroll = window.scrollY;
     try {
       // Scroll to top to prevent html2canvas out-of-viewport clipping bug
       window.scrollTo(0, 0);
-      await new Promise(resolve => setTimeout(resolve, 60));
 
       const page1 = document.getElementById('print-page-1');
       if (!page1) return;
@@ -81,7 +79,7 @@ export default function ProfileView() {
       canvas.height = 0;
       canvas = null;
       
-      const companyTag = company === 'company1' ? 'Kattam' : 'Thirumanam';
+      const companyTag = selectedCompany === 'company1' ? 'Kattam' : 'Thirumanam';
       pdf.save(`${candidate.fullName}_${companyTag}_Profile.pdf`);
     } catch (err) {
       console.error('[ProfileView] PDF Export Error:', err);
@@ -119,12 +117,51 @@ export default function ProfileView() {
 
   return (
     <div className="page-transition" style={{ maxWidth: '800px', margin: '0 auto', paddingBottom: '40px' }}>
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+      <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <button className="btn btn-secondary" onClick={() => navigate(-1)}><ArrowLeft size={16} /> {t('back')}</button>
+        
+        {/* Live Company Branding Switcher */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#edf2f7', padding: '4px 6px', borderRadius: '8px', border: '1px solid #cbd5e0' }}>
+          <span style={{ fontSize: '12px', fontWeight: 700, color: '#4a5568', paddingLeft: '4px', paddingRight: '4px' }}>{t('selectCompany') || 'Company Logo'}:</span>
+          <button 
+            style={{
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: 700,
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: selectedCompany === 'company1' ? '#3182ce' : 'transparent',
+              color: selectedCompany === 'company1' ? '#ffffff' : '#4a5568',
+              boxShadow: selectedCompany === 'company1' ? '0 1px 3px rgba(0,0,0,0.15)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
+            onClick={() => setSelectedCompany('company1')}
+          >
+            {t('company1Name') || 'Kattam Matrimony'}
+          </button>
+          <button 
+            style={{
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: 700,
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: selectedCompany === 'company2' ? '#3182ce' : 'transparent',
+              color: selectedCompany === 'company2' ? '#ffffff' : '#4a5568',
+              boxShadow: selectedCompany === 'company2' ? '0 1px 3px rgba(0,0,0,0.15)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
+            onClick={() => setSelectedCompany('company2')}
+          >
+            {t('company2Name') || 'Thirumanam Matrimony'}
+          </button>
+        </div>
+
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn btn-primary" onClick={handlePrint}><Printer size={16} /> {t('printProfile')}</button>
-          <button className="btn btn-primary" onClick={() => handleExportPDF('company1')}><Download size={16} /> {t('exportPdfCompany1') || 'PDF (Kattam)'}</button>
-          <button className="btn btn-secondary" onClick={() => handleExportPDF('company2')}><Download size={16} /> {t('exportPdfCompany2') || 'PDF (Thirumanam)'}</button>
+          <button className="btn btn-primary" onClick={handleExportPDF}><Download size={16} /> {t('exportPdf')}</button>
         </div>
       </div>
       
