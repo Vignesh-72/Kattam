@@ -5,6 +5,8 @@ import { Save, ArrowLeft, RefreshCw, Camera } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { calculateVedicChart } from '../utils/astrology';
 
+import { invalidateSearchCache } from './CandidateSearch';
+
 export default function DataEntry() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -166,6 +168,7 @@ export default function DataEntry() {
     }
     // Clear unsaved draft ONLY after database IPC confirms successful write
     localStorage.removeItem('kattam_form_draft');
+    invalidateSearchCache();
     setHasDraft(false);
     navigate('/search');
   };

@@ -44,24 +44,43 @@ const initialFilterState = {
   maxAge: '',
 };
 
+interface SearchCache {
+  searchMode: 'standard' | 'advanced';
+  candidates: any[];
+  searchTerm: string;
+  activeSearchTerm: string;
+  filters: typeof initialFilterState;
+  activeFilters: typeof initialFilterState;
+  dbOptions: SearchOptions;
+  page: number;
+  totalPages: number;
+  totalCount: number;
+}
+
+let searchCache: SearchCache | null = null;
+
+export function invalidateSearchCache() {
+  searchCache = null;
+}
+
 export default function CandidateSearch() {
-  const [searchMode, setSearchMode] = useState<'standard' | 'advanced'>('standard');
-  const [candidates, setCandidates] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeSearchTerm, setActiveSearchTerm] = useState('');
-  const [filters, setFilters] = useState(initialFilterState);
-  const [activeFilters, setActiveFilters] = useState(initialFilterState);
+  const [searchMode, setSearchMode] = useState<'standard' | 'advanced'>(() => searchCache?.searchMode || 'standard');
+  const [candidates, setCandidates] = useState<any[]>(() => searchCache?.candidates || []);
+  const [searchTerm, setSearchTerm] = useState(() => searchCache?.searchTerm || '');
+  const [activeSearchTerm, setActiveSearchTerm] = useState(() => searchCache?.activeSearchTerm || '');
+  const [filters, setFilters] = useState(() => searchCache?.filters || initialFilterState);
+  const [activeFilters, setActiveFilters] = useState(() => searchCache?.activeFilters || initialFilterState);
   
-  const [dbOptions, setDbOptions] = useState<SearchOptions>({
+  const [dbOptions, setDbOptions] = useState<SearchOptions>(() => searchCache?.dbOptions || {
     castes: [], subCastes: [], gothrams: [], stars: [], raasis: [], laknams: [],
     qualifications: [], occupations: [], religions: [], motherTongues: [], nativities: [], jobPlaces: [],
     diets: [], partnerJobReqs: [], partnerHoroscopeReqs: [], maritalStatuses: []
   });
   
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(() => searchCache?.page || 1);
+  const [totalPages, setTotalPages] = useState(() => searchCache?.totalPages || 1);
+  const [totalCount, setTotalCount] = useState(() => searchCache?.totalCount || 0);
+  const [loading, setLoading] = useState(() => !searchCache);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const PAGE_SIZE = 12;
@@ -285,22 +304,41 @@ export default function CandidateSearch() {
 
     try {
       if (window.api?.db?.get) {
-        setLoading(true);
+        if (!searchCache || searchCache.page !== targetPage) {
+          setLoading(true);
+        }
         const [countResult, rows] = await Promise.all([
           window.api.db.get(countQuery, countParams),
           window.api.db.all(dataQuery, dataParams)
         ]);
         const total = countResult ? countResult.count : 0;
+        const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+        const candidateRows = rows || [];
+        
         setTotalCount(total);
-        setTotalPages(Math.max(1, Math.ceil(total / PAGE_SIZE)));
-        setCandidates(rows || []);
+        setTotalPages(pages);
+        setCandidates(candidateRows);
+
+        // Update module-level cache for instant page switching
+        searchCache = {
+          searchMode,
+          candidates: candidateRows,
+          searchTerm,
+          activeSearchTerm,
+          filters,
+          activeFilters,
+          dbOptions,
+          page: targetPage,
+          totalPages: pages,
+          totalCount: total
+        };
       }
     } catch (e) {
       console.error('[CandidateSearch] Query Execution Error:', e);
     } finally {
       setLoading(false);
     }
-  }, [searchMode, activeSearchTerm, activeFilters]);
+  }, [searchMode, activeSearchTerm, activeFilters, searchTerm, filters, dbOptions]);
 
   useEffect(() => {
     loadCandidates(page);
@@ -308,6 +346,7 @@ export default function CandidateSearch() {
 
   const handleDelete = async (id: number) => {
     if (confirm(t('confirmDelete'))) {
+      searchCache = null;
       if (window.api?.deleteCandidate) {
         await window.api.deleteCandidate(id);
       } else if (window.api?.db?.run) {
@@ -315,7 +354,7 @@ export default function CandidateSearch() {
       }
       setPage(1);
       loadCandidates(1);
-      fetchFilterOptions(filters.caste);
+      fetchFilterOptions();
     }
   };
 
