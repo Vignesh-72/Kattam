@@ -321,37 +321,65 @@ ipcMain.handle('db:get', (event, query, params) => {
   });
 });
 
-const fetchSearchFilterOptions = (selectedCaste) => {
+const fetchSearchFilterOptions = (filterState = {}) => {
   return new Promise((resolve) => {
-    const subCasteSql = selectedCaste
-      ? "SELECT DISTINCT TRIM(subCaste) as val FROM candidates WHERE LOWER(TRIM(caste)) = LOWER(TRIM(?)) AND subCaste IS NOT NULL AND TRIM(subCaste) != '' ORDER BY val ASC"
-      : "SELECT DISTINCT TRIM(subCaste) as val FROM candidates WHERE subCaste IS NOT NULL AND TRIM(subCaste) != '' ORDER BY val ASC";
+    const filters = typeof filterState === 'string' ? { caste: filterState } : (filterState || {});
 
-    const queries = {
-      castes: { sql: "SELECT DISTINCT TRIM(caste) as val FROM candidates WHERE caste IS NOT NULL AND TRIM(caste) != '' ORDER BY val ASC", params: [] },
-      subCastes: { sql: subCasteSql, params: selectedCaste ? [selectedCaste] : [] },
-      gothrams: { sql: "SELECT DISTINCT TRIM(gothram) as val FROM candidates WHERE gothram IS NOT NULL AND TRIM(gothram) != '' ORDER BY val ASC", params: [] },
-      stars: { sql: "SELECT DISTINCT TRIM(star) as val FROM candidates WHERE star IS NOT NULL AND TRIM(star) != '' ORDER BY val ASC", params: [] },
-      raasis: { sql: "SELECT DISTINCT TRIM(raasi) as val FROM candidates WHERE raasi IS NOT NULL AND TRIM(raasi) != '' ORDER BY val ASC", params: [] },
-      laknams: { sql: "SELECT DISTINCT TRIM(laknam) as val FROM candidates WHERE laknam IS NOT NULL AND TRIM(laknam) != '' ORDER BY val ASC", params: [] },
-      qualifications: { sql: "SELECT DISTINCT TRIM(qualification) as val FROM candidates WHERE qualification IS NOT NULL AND TRIM(qualification) != '' ORDER BY val ASC", params: [] },
-      occupations: { sql: "SELECT DISTINCT TRIM(occupation) as val FROM candidates WHERE occupation IS NOT NULL AND TRIM(occupation) != '' ORDER BY val ASC", params: [] },
-      religions: { sql: "SELECT DISTINCT TRIM(religion) as val FROM candidates WHERE religion IS NOT NULL AND TRIM(religion) != '' ORDER BY val ASC", params: [] },
-      motherTongues: { sql: "SELECT DISTINCT TRIM(motherTongue) as val FROM candidates WHERE motherTongue IS NOT NULL AND TRIM(motherTongue) != '' ORDER BY val ASC", params: [] },
-      nativities: { sql: "SELECT DISTINCT TRIM(nativity) as val FROM candidates WHERE nativity IS NOT NULL AND TRIM(nativity) != '' ORDER BY val ASC", params: [] },
-      jobPlaces: { sql: "SELECT DISTINCT TRIM(placeOfJob) as val FROM candidates WHERE placeOfJob IS NOT NULL AND TRIM(placeOfJob) != '' ORDER BY val ASC", params: [] },
-      diets: { sql: "SELECT DISTINCT TRIM(diet) as val FROM candidates WHERE diet IS NOT NULL AND TRIM(diet) != '' ORDER BY val ASC", params: [] },
-      partnerJobReqs: { sql: "SELECT DISTINCT TRIM(partnerJobReq) as val FROM candidates WHERE partnerJobReq IS NOT NULL AND TRIM(partnerJobReq) != '' ORDER BY val ASC", params: [] },
-      partnerHoroscopeReqs: { sql: "SELECT DISTINCT TRIM(partnerHoroscopeReq) as val FROM candidates WHERE partnerHoroscopeReq IS NOT NULL AND TRIM(partnerHoroscopeReq) != '' ORDER BY val ASC", params: [] }
+    const fieldMapping = {
+      castes: 'caste',
+      subCastes: 'subCaste',
+      gothrams: 'gothram',
+      stars: 'star',
+      raasis: 'raasi',
+      laknams: 'laknam',
+      qualifications: 'qualification',
+      occupations: 'occupation',
+      religions: 'religion',
+      motherTongues: 'motherTongue',
+      nativities: 'nativity',
+      jobPlaces: 'placeOfJob',
+      diets: 'diet',
+      partnerJobReqs: 'partnerJobReq',
+      partnerHoroscopeReqs: 'partnerHoroscopeReq'
+    };
+
+    const buildQueryForField = (targetCol) => {
+      const conditions = [`${targetCol} IS NOT NULL`, `TRIM(${targetCol}) != ''` ];
+      const params = [];
+
+      Object.entries(fieldMapping).forEach(([, col]) => {
+        if (col === targetCol) return;
+        const val = filters[col] || (col === 'placeOfJob' ? filters.jobPlace : null);
+        if (val && String(val).trim().length > 0 && val !== 'All') {
+          conditions.push(`LOWER(TRIM(${col})) = LOWER(TRIM(?))`);
+          params.push(String(val).trim());
+        }
+      });
+
+      if (filters.gender && filters.gender !== 'All' && targetCol !== 'gender') {
+        conditions.push(`LOWER(TRIM(gender)) = LOWER(TRIM(?))`);
+        params.push(String(filters.gender).trim());
+      }
+      if (filters.maritalStatus && filters.maritalStatus !== 'All' && targetCol !== 'maritalStatus') {
+        conditions.push(`LOWER(TRIM(maritalStatus)) = LOWER(TRIM(?))`);
+        params.push(String(filters.maritalStatus).trim());
+      }
+
+      return {
+        sql: `SELECT DISTINCT TRIM(${targetCol}) as val FROM candidates WHERE ${conditions.join(' AND ')} ORDER BY val ASC`,
+        params
+      };
     };
 
     const results = {};
-    const keys = Object.keys(queries);
+    const keys = Object.keys(fieldMapping);
     let pending = keys.length;
 
     for (const key of keys) {
-      const q = queries[key];
-      db.all(q.sql, q.params, (err, rows) => {
+      const targetCol = fieldMapping[key];
+      const { sql, params } = buildQueryForField(targetCol);
+
+      db.all(sql, params, (err, rows) => {
         if (!err && rows) {
           results[key] = rows.map(r => r.val).filter(v => v && String(v).trim().length > 0);
         } else {

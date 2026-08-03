@@ -66,52 +66,48 @@ export default function CandidateSearch() {
   const PAGE_SIZE = 12;
 
   // Asynchronously fetch distinct values STRICTLY from SQLite database
-  const fetchFilterOptions = useCallback(async (selectedCaste?: string) => {
+  // Asynchronously fetch distinct values STRICTLY from SQLite database dynamically matching current selections
+  const fetchFilterOptions = useCallback(async (currentFilters?: any) => {
     try {
       let res = null;
       if (window.api?.db?.getSearchOptions) {
         try {
-          res = await window.api.db.getSearchOptions(selectedCaste);
+          res = await window.api.db.getSearchOptions(currentFilters);
         } catch (_) {}
       }
       if (!res && window.api?.getSearchFilterOptions) {
         try {
-          res = await window.api.getSearchFilterOptions(selectedCaste);
+          res = await window.api.getSearchFilterOptions(currentFilters);
         } catch (_) {}
       }
       if (res) {
-        setDbOptions(prev => ({
-          castes: res.castes && res.castes.length > 0 ? res.castes : prev.castes,
+        setDbOptions({
+          castes: res.castes || [],
           subCastes: res.subCastes || [],
-          gothrams: res.gothrams && res.gothrams.length > 0 ? res.gothrams : prev.gothrams,
-          stars: res.stars && res.stars.length > 0 ? res.stars : prev.stars,
-          raasis: res.raasis && res.raasis.length > 0 ? res.raasis : prev.raasis,
-          laknams: res.laknams && res.laknams.length > 0 ? res.laknams : prev.laknams,
-          qualifications: res.qualifications && res.qualifications.length > 0 ? res.qualifications : prev.qualifications,
-          occupations: res.occupations && res.occupations.length > 0 ? res.occupations : prev.occupations,
-          religions: res.religions && res.religions.length > 0 ? res.religions : prev.religions,
-          motherTongues: res.motherTongues && res.motherTongues.length > 0 ? res.motherTongues : prev.motherTongues,
-          nativities: res.nativities && res.nativities.length > 0 ? res.nativities : prev.nativities,
-          jobPlaces: res.jobPlaces && res.jobPlaces.length > 0 ? res.jobPlaces : prev.jobPlaces,
-          diets: res.diets && res.diets.length > 0 ? res.diets : prev.diets,
-          partnerJobReqs: res.partnerJobReqs && res.partnerJobReqs.length > 0 ? res.partnerJobReqs : prev.partnerJobReqs,
-          partnerHoroscopeReqs: res.partnerHoroscopeReqs && res.partnerHoroscopeReqs.length > 0 ? res.partnerHoroscopeReqs : prev.partnerHoroscopeReqs,
-        }));
+          gothrams: res.gothrams || [],
+          stars: res.stars || [],
+          raasis: res.raasis || [],
+          laknams: res.laknams || [],
+          qualifications: res.qualifications || [],
+          occupations: res.occupations || [],
+          religions: res.religions || [],
+          motherTongues: res.motherTongues || [],
+          nativities: res.nativities || [],
+          jobPlaces: res.jobPlaces || [],
+          diets: res.diets || [],
+          partnerJobReqs: res.partnerJobReqs || [],
+          partnerHoroscopeReqs: res.partnerHoroscopeReqs || [],
+        });
       }
     } catch (err) {
       console.error('[CandidateSearch] Error fetching DB filter options:', err);
     }
   }, []);
 
-  // Fetch initial filter options on mount
+  // Dynamically re-fetch dropdown options from SQLite whenever any filter selection changes
   useEffect(() => {
-    fetchFilterOptions();
-  }, [fetchFilterOptions]);
-
-  // Re-fetch dependent Sub-Castes dynamically when Caste selection changes
-  useEffect(() => {
-    fetchFilterOptions(filters.caste);
-  }, [filters.caste, fetchFilterOptions]);
+    fetchFilterOptions(filters);
+  }, [filters, fetchFilterOptions]);
 
   // Options derived strictly from database queries
   const casteOptions = useMemo(() => dbOptions.castes || [], [dbOptions.castes]);
