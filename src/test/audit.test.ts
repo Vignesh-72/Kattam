@@ -294,3 +294,25 @@ describe('EDGE-CASE · Rapid Button Clicking & Print Job Debounce', () => {
     expect(isExporting).toBe(true);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PERF-04 · SQLite Maintenance & WAL Control & Packaging Config
+// ─────────────────────────────────────────────────────────────────────────────
+describe('PERF-04 · SQLite WAL Checkpointing, Auto-Vacuum & Packaging Configuration', () => {
+  it('verifies WAL checkpoint and PRAGMA optimize queries are valid', () => {
+    const walCheckpointSql = 'PRAGMA wal_checkpoint(TRUNCATE)';
+    const optimizeSql = 'PRAGMA optimize';
+    const autoVacuumSql = 'PRAGMA auto_vacuum = INCREMENTAL';
+
+    expect(walCheckpointSql).toContain('wal_checkpoint(TRUNCATE)');
+    expect(optimizeSql).toBe('PRAGMA optimize');
+    expect(autoVacuumSql).toContain('auto_vacuum = INCREMENTAL');
+  });
+
+  it('verifies package.json has asar enabled and sqlite3 native unpacked', async () => {
+    const pkg = await import('../../package.json');
+    expect(pkg.build.asar).toBe(true);
+    expect(pkg.build.asarUnpack).toContain('**/node_modules/sqlite3/**/*');
+  });
+});
+

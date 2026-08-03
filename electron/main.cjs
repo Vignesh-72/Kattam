@@ -19,6 +19,7 @@ app.commandLine.appendSwitch('force-color-profile', 'srgb');
 app.commandLine.appendSwitch('disable-gpu');
 app.commandLine.appendSwitch('disable-software-rasterizer');
 app.commandLine.appendSwitch('disable-gpu-sandbox');
+app.commandLine.appendSwitch('disable-gpu-compositing');
 
 let mainWindow;
 let db;
@@ -89,6 +90,7 @@ function initDB() {
       db.run('PRAGMA cache_size = -8000');    // 8MB page cache held in RAM
       db.run('PRAGMA temp_store = MEMORY');   // Temp tables go to RAM, not disk
       db.run('PRAGMA mmap_size = 30000000');  // 30MB memory-mapped I/O
+      db.run('PRAGMA auto_vacuum = INCREMENTAL'); // Prevents long-term SQLite database file fragmentation
 
       // ─── Main candidates table ────────────────────────────────────────────
       db.run(`
@@ -325,4 +327,32 @@ ipcMain.handle('pick-and-save-image', async (event, fileName) => {
   const dest = path.join(imagesDir, fileName);
   await fs.promises.copyFile(src, dest);
   return dest;
+});
+
+// ─── IPC: Manual / Maintenance Database Vacuum Trigger ────────────────────────
+ipcMain.handle('db-vacuum', async () => {
+  return new Promise((resolve) => {
+    if (!db) return resolve({ success: false, error: 'Database not initialized' });
+    db.serialize(() => {
+      db.run('PRAGMA incremental_vacuum;', (err) => {
+        if (err) resolve({ success: false, error: err.message });
+        else resolve({ success: true });
+      });
+    });
+  });
+});
+
+// ─── App Lifecycle: WAL Checkpoint & Query Optimization On Termination ───────
+app.on('before-quit', () => {
+  if (db) {
+    try {
+      console.log('[DB] Merging WAL log pages & optimizing query planner indexes before quit...');
+      db.serialize(() => {
+        db.run('PRAGMA wal_checkpoint(TRUNCATE)');
+        db.run('PRAGMA optimize');
+      });
+    } catch (err) {
+      console.error('[DB] Exit optimization error:', err);
+    }
+  }
 });

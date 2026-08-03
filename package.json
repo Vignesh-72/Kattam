@@ -31,6 +31,10 @@
   "build": {
     "appId": "com.kattam.matrimony",
     "productName": "Kattam Matrimony",
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/sqlite3/**/*"
+    ],
     "directories": {
       "output": "dist-electron"
     },
