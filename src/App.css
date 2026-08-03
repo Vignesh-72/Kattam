@@ -105,6 +105,8 @@ h1, h2, h3, h4, .app-title {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
 }
 
 .top-navbar {
@@ -195,15 +197,18 @@ h1, h2, h3, h4, .app-title {
 }
 
 .main-content {
-  flex-grow: 1;
-  padding: var(--space-4) var(--space-6) 80px var(--space-6);
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--space-4) var(--space-6) clamp(60px, 8vh, 120px) var(--space-6);
   background-color: transparent;
   animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* CSS-02: Further reduce padding at exactly the 1024px target resolution */
 @media (max-width: 1100px) {
-  .main-content { padding: var(--space-3) var(--space-4) 80px var(--space-4); }
+  .main-content { padding: var(--space-3) var(--space-4) clamp(60px, 8vh, 120px) var(--space-4); }
 }
 
 
