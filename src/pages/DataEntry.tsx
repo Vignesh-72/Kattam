@@ -132,9 +132,7 @@ export default function DataEntry() {
     const lat = parseFloat(formData.birthLat) || 13.0827;
     const lon = parseFloat(formData.birthLon) || 80.2707;
 
-    // BUG-06: Removed dead VedAstro API call. The original code fetched the API,
-    // waited up to 3 seconds, then discarded the response and used the local engine anyway.
-    // The local astronomy-engine is the sole calculation engine.
+    // 100% Offline Kattam calculation using local astronomy-engine (zero internet/API dependencies).
     const result = calculateVedicChart(formData.dob, timeStr, lat, lon, language === 'ta');
     if (result) {
       setRasiData(result.rasiData);
