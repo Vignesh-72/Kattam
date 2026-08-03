@@ -41,10 +41,18 @@ export default function ProfileView() {
   };
 
   const handleExportPDF = async () => {
+    // Save original scroll position
+    const originalScroll = window.scrollY;
+    // Scroll to top to prevent html2canvas out-of-viewport clipping bug
+    window.scrollTo(0, 0);
+
     const page1 = document.getElementById('print-page-1');
     const page2 = document.getElementById('print-page-2');
     
     if (!page1) return;
+    
+    // Slight delay to allow DOM to settle after scroll
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     const pdf = new jsPDF({
       orientation: 'portrait',
@@ -55,21 +63,24 @@ export default function ProfileView() {
     const pdfWidth = pdf.internal.pageSize.getWidth();
     
     // Page 1
-    const canvas1 = await html2canvas(page1, { scale: 1, useCORS: true });
-    const imgData1 = canvas1.toDataURL('image/png');
+    const canvas1 = await html2canvas(page1, { scale: 2, useCORS: true, scrollY: 0 });
+    const imgData1 = canvas1.toDataURL('image/jpeg', 1.0);
     const pdfHeight1 = (canvas1.height * pdfWidth) / canvas1.width;
-    pdf.addImage(imgData1, 'PNG', 0, 0, pdfWidth, pdfHeight1);
+    pdf.addImage(imgData1, 'JPEG', 0, 0, pdfWidth, pdfHeight1);
     
     // Page 2
     if (page2 && (candidate.rasiKattam || candidate.amsamKattam)) {
       pdf.addPage();
-      const canvas2 = await html2canvas(page2, { scale: 1, useCORS: true });
-      const imgData2 = canvas2.toDataURL('image/png');
+      const canvas2 = await html2canvas(page2, { scale: 2, useCORS: true, scrollY: 0 });
+      const imgData2 = canvas2.toDataURL('image/jpeg', 1.0);
       const pdfHeight2 = (canvas2.height * pdfWidth) / canvas2.width;
-      pdf.addImage(imgData2, 'PNG', 0, 0, pdfWidth, pdfHeight2);
+      pdf.addImage(imgData2, 'JPEG', 0, 0, pdfWidth, pdfHeight2);
     }
     
     pdf.save(`${candidate.fullName}_Profile.pdf`);
+    
+    // Restore scroll position
+    window.scrollTo(0, originalScroll);
   };
 
   // Helper for readonly grid
@@ -104,8 +115,8 @@ export default function ProfileView() {
         </div>
       </div>
       
-      <div id="print-area">
-        <div id="print-page-1" style={{ backgroundColor: 'white', padding: '24px', border: '1px solid #e2e8f0', color: '#2d3748', marginBottom: '20px' }}>
+      <div id="print-area" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+        <div id="print-page-1" style={{ backgroundColor: 'white', padding: '32px', color: '#2d3748' }}>
           {/* Header */}
           <div style={{ textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '12px', marginBottom: '16px' }}>
             <img src="/images/logo_transparent.png" alt="Logo" style={{ height: '60px', marginBottom: '8px' }} className="print-logo" />
@@ -197,7 +208,9 @@ export default function ProfileView() {
         </div>
 
         {/* Charts Page */}
-        <div id="print-page-2" style={{ pageBreakBefore: 'always', backgroundColor: 'white', padding: '24px', border: '1px solid #e2e8f0', color: '#2d3748' }}>
+        {/* Visual separator for UI, acts as page break for print */}
+        <div className="no-print" style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '0 32px' }}></div>
+        <div id="print-page-2" style={{ pageBreakBefore: 'always', backgroundColor: 'white', padding: '32px', color: '#2d3748' }}>
           <h3 style={{ borderBottom: '2px solid #000', paddingBottom: '8px', marginBottom: '16px', color: '#000', fontSize: '16px' }}>{t('horoscopeCharts') || 'Horoscope Charts (Kattam)'}</h3>
           {chartDataError ? (
             <div style={{ padding: '24px', backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: '8px', color: '#856404' }}>
