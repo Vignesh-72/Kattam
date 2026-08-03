@@ -200,14 +200,14 @@ export default function DataEntry() {
               </div>
               <div className="form-group col-8">
                 <label>{t('tob')}</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <select className="form-control" name="tobHour" value={formData.tobHour} onChange={handleChange} style={{ width: '80px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  <select className="form-control" name="tobHour" value={formData.tobHour} onChange={handleChange} style={{ flex: 1, minWidth: '70px', maxWidth: '80px' }}>
                     {[...Array(12)].map((_, i) => <option key={i} value={String(i + 1).padStart(2, '0')}>{String(i + 1).padStart(2, '0')}</option>)}
                   </select>
-                  <select className="form-control" name="tobMinute" value={formData.tobMinute} onChange={handleChange} style={{ width: '80px' }}>
+                  <select className="form-control" name="tobMinute" value={formData.tobMinute} onChange={handleChange} style={{ flex: 1, minWidth: '70px', maxWidth: '80px' }}>
                     {[...Array(60)].map((_, i) => <option key={i} value={String(i).padStart(2, '0')}>{String(i).padStart(2, '0')}</option>)}
                   </select>
-                  <select className="form-control" name="tobAmPm" value={formData.tobAmPm} onChange={handleChange} style={{ width: '80px' }}>
+                  <select className="form-control" name="tobAmPm" value={formData.tobAmPm} onChange={handleChange} style={{ flex: 1, minWidth: '70px', maxWidth: '80px' }}>
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
                   </select>
@@ -216,10 +216,10 @@ export default function DataEntry() {
 
               <div className="form-group col-6">
                 <label>{t('placeOfBirth')}</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <input type="text" className="form-control" name="birthPlace" value={formData.birthPlace} onChange={handleChange} placeholder="City name" style={{ flexGrow: 1 }} />
-                  <input type="text" className="form-control" name="birthLat" value={formData.birthLat} onChange={handleChange} placeholder="Lat (13.08)" style={{ width: '100px' }} />
-                  <input type="text" className="form-control" name="birthLon" value={formData.birthLon} onChange={handleChange} placeholder="Lon (80.27)" style={{ width: '100px' }} />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  <input type="text" className="form-control" name="birthPlace" value={formData.birthPlace} onChange={handleChange} placeholder="City name" style={{ flexGrow: 1, minWidth: '120px' }} />
+                  <input type="text" className="form-control" name="birthLat" value={formData.birthLat} onChange={handleChange} placeholder="Lat (13.08)" style={{ flex: 1, minWidth: '80px', maxWidth: '100px' }} />
+                  <input type="text" className="form-control" name="birthLon" value={formData.birthLon} onChange={handleChange} placeholder="Lon (80.27)" style={{ flex: 1, minWidth: '80px', maxWidth: '100px' }} />
                 </div>
               </div>
               <div className="form-group col-3">

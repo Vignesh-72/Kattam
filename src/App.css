@@ -51,12 +51,12 @@
   --space-6: 48px;
   --space-8: 64px;
 
-  /* Type Scale */
-  --text-xs: 13px;
-  --text-sm: 15px;
-  --text-base: 18px;
-  --text-lg: 22px;
-  --text-xl: 28px;
+  /* Type Scale (Fluid typography for ultra-small to 4K scaling) */
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.85rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.3vw, 1rem);
+  --text-base: clamp(1rem, 0.9rem + 0.4vw, 1.125rem);
+  --text-lg: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.3rem + 1vw, 2rem);
 }
 
 * {
@@ -72,6 +72,8 @@ body {
   font-size: var(--text-sm);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  /* Prevent horizontal scrollbars on low-res screens or high DPI scaling */
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, .app-title {
@@ -106,8 +108,14 @@ h1, h2, h3, h4, .app-title {
   padding: 0 var(--space-4);
   flex-shrink: 0;
   border-radius: 100px;
-  margin: var(--space-2) var(--space-4) 0 var(--space-4);
+  max-width: 1400px;
+  margin: var(--space-2) auto 0 auto;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Constrain side margins on screens below 1440px but keep centered */
+@media (max-width: 1440px) {
+  .top-navbar { margin: var(--space-2) var(--space-4) 0 var(--space-4); }
 }
 
 /* CSS-04: Reduce navbar side margins at 1024px so content area isn't clipped */

@@ -83,7 +83,7 @@ export default function ProfileView() {
       }
     };
     return (
-      <div style={{ width: '300px', height: '300px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(4, 1fr)', border: '2px solid #000', backgroundColor: '#fff' }}>
+      <div style={{ width: 'min(300px, 100%)', aspectRatio: '1 / 1', height: 'auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(4, 1fr)', border: '2px solid #000', backgroundColor: '#fff' }}>
         <div style={{ gridColumn: '2 / 4', gridRow: '2 / 4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 600, color: '#000', border: '1px solid #718096' }}>{title}</div>
         {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(house => (
           <div key={house} style={{ border: '1px solid #718096', padding: '4px', gridArea: getGridArea(house), display: 'flex', flexDirection: 'column', fontSize: '0.75rem', lineHeight: 1.2 }}>
@@ -205,7 +205,7 @@ export default function ProfileView() {
               Please re-enter and save the profile to rebuild the charts.
             </div>
           ) : (
-          <div style={{ display: 'flex', gap: '30px', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center' }}>
             {candidate.rasiKattam && (
               <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
                 <ReadOnlyGrid title={t('rasiTitle')} data={JSON.parse(candidate.rasiKattam)} />
