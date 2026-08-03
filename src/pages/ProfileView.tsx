@@ -82,7 +82,7 @@ export default function ProfileView() {
     }
   };
 
-  // Helper for clear, unclipped readonly grid
+  // Helper for clear, unclipped, spacious readonly grid
   const ReadOnlyGrid = ({ title, data }: { title: string, data: Record<number, string[]> }) => {
     const getGridArea = (house: number) => {
       switch (house) {
@@ -93,10 +93,10 @@ export default function ProfileView() {
       }
     };
     return (
-      <div style={{ width: '270px', height: '270px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(4, 1fr)', border: '2px solid #000', backgroundColor: '#fff' }}>
-        <div style={{ gridColumn: '2 / 4', gridRow: '2 / 4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.05rem', fontWeight: 700, color: '#000', border: '1px solid #718096' }}>{title}</div>
+      <div style={{ width: '310px', height: '310px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gridTemplateRows: 'repeat(4, 1fr)', border: '2px solid #000', backgroundColor: '#fff' }}>
+        <div style={{ gridColumn: '2 / 4', gridRow: '2 / 4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 700, color: '#000', border: '1px solid #718096' }}>{title}</div>
         {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(house => (
-          <div key={house} style={{ border: '1px solid #718096', padding: '3px 4px', gridArea: getGridArea(house), display: 'flex', flexDirection: 'column', fontSize: '0.72rem', lineHeight: 1.25, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+          <div key={house} style={{ border: '1px solid #718096', padding: '4px 6px', gridArea: getGridArea(house), display: 'flex', flexDirection: 'column', fontSize: '0.78rem', lineHeight: 1.3, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
             {(data[house] || []).map((g, i) => <div key={i} style={{ fontWeight: 'bold' }}>{t(g.trim() as any) || g.trim()}</div>)}
           </div>
         ))}
@@ -115,31 +115,31 @@ export default function ProfileView() {
       </div>
       
       <div id="print-area" style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
-        <div id="print-page-1" style={{ backgroundColor: 'white', padding: '24px 32px', color: '#2d3748' }}>
+        <div id="print-page-1" style={{ backgroundColor: 'white', padding: '36px 40px', color: '#2d3748' }}>
           {/* Header */}
-          <div style={{ position: 'relative', borderBottom: '2px solid #000', paddingBottom: '8px', marginBottom: '12px' }}>
-            <img src="/images/logo_transparent.png" alt="Logo" style={{ position: 'absolute', top: 0, left: 0, height: '48px' }} className="print-logo" />
+          <div style={{ position: 'relative', borderBottom: '2px solid #000', paddingBottom: '10px', marginBottom: '16px' }}>
+            <img src="/images/logo_transparent.png" alt="Logo" style={{ position: 'absolute', top: 0, left: 0, height: '52px' }} className="print-logo" />
             <div style={{ textAlign: 'center' }}>
-              <h1 style={{ fontSize: '18px', margin: '0 0 2px 0', color: '#000', fontWeight: 700 }}>{t('kattamMatrimony')}</h1>
-              <h2 style={{ fontSize: '13px', margin: 0, color: '#444', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('candidateProfile')}</h2>
+              <h1 style={{ fontSize: '20px', margin: '0 0 4px 0', color: '#000', fontWeight: 700 }}>{t('kattamMatrimony')}</h1>
+              <h2 style={{ fontSize: '14px', margin: 0, color: '#444', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('candidateProfile')}</h2>
             </div>
             
             {/* Reg No (Left) & Reg Date (Right) directly below Candidate Profile title */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', fontSize: '12px', fontWeight: 'bold', color: '#2d3748' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', fontSize: '13px', fontWeight: 'bold', color: '#2d3748' }}>
               <div>{t('regNo')}: {candidate.registrationId || `TMM-${candidate.id}`}</div>
               <div>{t('regDate')}: {extraData.regDate || candidate.createdAt?.split(' ')[0]}</div>
             </div>
           </div>
         
-        <div style={{ display: 'flex', gap: '16px', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
           {candidate.photo1 && (
-            <div style={{ width: '105px', height: '130px', flexShrink: 0, border: '1px solid #cbd5e0', borderRadius: '4px', overflow: 'hidden' }}>
+            <div style={{ width: '120px', height: '145px', flexShrink: 0, border: '1px solid #cbd5e0', borderRadius: '4px', overflow: 'hidden' }}>
               <img src={window.api.getLocalImage(candidate.photo1)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Candidate" />
             </div>
           )}
           <div style={{ flexGrow: 1 }}>
-            <h3 style={{ fontSize: '16px', marginBottom: '8px', color: '#000', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px' }}>{candidate.fullName}</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px', fontSize: '12px' }}>
+            <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#000', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px' }}>{candidate.fullName}</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 20px', fontSize: '13px' }}>
               <div><strong>{t('gender')}:</strong> {candidate.gender ? t(candidate.gender.toLowerCase() as any) || candidate.gender : ''}</div>
               <div><strong>{t('dob')}:</strong> {candidate.dob}</div>
               <div><strong>{t('tob')}:</strong> {candidate.tobHour}:{candidate.tobMinute} {candidate.tobAmPm}</div>
@@ -152,10 +152,10 @@ export default function ProfileView() {
         </div>
         
         {/* Sections */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '12px', fontSize: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '20px', fontSize: '13px' }}>
           <div>
-            <h4 style={{ color: '#000', borderBottom: '1px solid #cbd5e0', paddingBottom: '2px', marginBottom: '6px', fontSize: '13px', fontWeight: 700 }}>{t('familyDetails')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #cbd5e0', paddingBottom: '4px', marginBottom: '8px', fontSize: '14px', fontWeight: 700 }}>{t('familyDetails')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <div><strong>{t('fatherName')}:</strong> {candidate.fatherName} ({candidate.fatherJob})</div>
               <div><strong>{t('motherName')}:</strong> {candidate.motherName} ({candidate.motherJob})</div>
               <div><strong>{t('brothers') || 'Brothers'}:</strong> {extraData.brothers || '0'} ({t('brothersMarried') || 'Married'}: {extraData.brothersMarried || '0'})</div>
@@ -163,8 +163,8 @@ export default function ProfileView() {
               <div><strong>{t('nativity')}:</strong> {candidate.nativity}</div>
             </div>
 
-            <h4 style={{ color: '#000', borderBottom: '1px solid #cbd5e0', paddingBottom: '2px', marginTop: '10px', marginBottom: '6px', fontSize: '13px', fontWeight: 700 }}>{t('physicalEducation')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #cbd5e0', paddingBottom: '4px', marginTop: '14px', marginBottom: '8px', fontSize: '14px', fontWeight: 700 }}>{t('physicalEducation')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <div><strong>{t('qualification')}:</strong> {candidate.qualification}</div>
               <div><strong>{t('occupation')}:</strong> {candidate.occupation}</div>
               <div><strong>{t('income')}:</strong> {candidate.income}</div>
@@ -176,8 +176,8 @@ export default function ProfileView() {
           </div>
 
           <div>
-            <h4 style={{ color: '#000', borderBottom: '1px solid #cbd5e0', paddingBottom: '2px', marginBottom: '6px', fontSize: '13px', fontWeight: 700 }}>{t('astrologicalDetails')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #cbd5e0', paddingBottom: '4px', marginBottom: '8px', fontSize: '14px', fontWeight: 700 }}>{t('astrologicalDetails')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <div><strong>{t('caste')}:</strong> {candidate.caste} ({candidate.subCaste})</div>
               <div><strong>{t('star')}:</strong> {candidate.star}</div>
               <div><strong>{t('raasi')}:</strong> {candidate.raasi}</div>
@@ -186,26 +186,26 @@ export default function ProfileView() {
               <div><strong>{t('gothram')}:</strong> {candidate.gothram}</div>
             </div>
 
-            <h4 style={{ color: '#000', borderBottom: '1px solid #cbd5e0', paddingBottom: '2px', marginTop: '10px', marginBottom: '6px', fontSize: '13px', fontWeight: 700 }}>{t('communicationDetails')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #cbd5e0', paddingBottom: '4px', marginTop: '14px', marginBottom: '8px', fontSize: '14px', fontWeight: 700 }}>{t('communicationDetails')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <div><strong>{t('contactPerson')}:</strong> {candidate.contactPerson}</div>
               <div><strong>{t('contactNumber')}:</strong> {candidate.contactNumber}</div>
-              <div><strong>{t('address')}:</strong> {candidate.presentAddress}</div>
-              <div><strong>{t('expectation') || 'Expectations'}:</strong> {candidate.partnerComments}</div>
+              <div style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}><strong>{t('address')}:</strong> {candidate.presentAddress}</div>
+              <div style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}><strong>{t('expectation') || 'Expectations'}:</strong> {candidate.partnerComments}</div>
             </div>
           </div>
         </div>
 
         {/* Packed Horoscope Charts (Kattam) on Page 1 */}
         {(candidate.rasiKattam || candidate.amsamKattam) && (
-          <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '2px solid #000' }}>
-            <h4 style={{ color: '#000', fontSize: '13px', fontWeight: 700, marginBottom: '8px', textAlign: 'center' }}>{t('horoscopeCharts') || 'Horoscope Charts (Kattam)'}</h4>
+          <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '2px solid #000' }}>
+            <h4 style={{ color: '#000', fontSize: '15px', fontWeight: 700, marginBottom: '12px', textAlign: 'center' }}>{t('horoscopeCharts') || 'Horoscope Charts (Kattam)'}</h4>
             {chartDataError ? (
-              <div style={{ padding: '12px', backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: '6px', color: '#856404', fontSize: '12px' }}>
+              <div style={{ padding: '12px', backgroundColor: '#fff3cd', border: '1px solid #ffc107', borderRadius: '6px', color: '#856404', fontSize: '13px' }}>
                 ⚠️ Chart data is unavailable for this profile.
               </div>
             ) : (
-              <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '28px', justifyContent: 'center', alignItems: 'center' }}>
                 {candidate.rasiKattam && (
                   <ReadOnlyGrid title={t('rasiTitle')} data={JSON.parse(candidate.rasiKattam)} />
                 )}
