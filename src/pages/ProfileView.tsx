@@ -167,25 +167,24 @@ export default function ProfileView() {
         </div>
         
         {/* Detail Sections */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', fontSize: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '10px', fontSize: '11.5px' }}>
           <div>
-            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '6px', fontSize: '13px' }}>{t('familyDetails')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '4px', fontSize: '12.5px' }}>{t('familyDetails')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <div><strong>{t('fatherName')}:</strong> {candidate.fatherName} ({candidate.fatherJob})</div>
               <div><strong>{t('motherName')}:</strong> {candidate.motherName} ({candidate.motherJob})</div>
-              <div>
-                <span><strong>{t('brothers') || 'Brothers'}:</strong> {extraData.brothers} ({extraData.brothersMarried} m)</span> | 
-                <span style={{ marginLeft: '4px' }}><strong>{t('sisters') || 'Sisters'}:</strong> {extraData.sisters} ({extraData.sistersMarried} m)</span>
-              </div>
+              <div><strong>{t('brothers') || 'Brothers'}:</strong> {extraData.brothers} ({extraData.brothersMarried} m)</div>
+              <div><strong>{t('sisters') || 'Sisters'}:</strong> {extraData.sisters} ({extraData.sistersMarried} m)</div>
               <div><strong>{t('nativity')}:</strong> {candidate.nativity}</div>
             </div>
           </div>
           <div>
-            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '6px', fontSize: '13px' }}>{t('physicalEducation')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '4px', fontSize: '12.5px' }}>{t('physicalEducation')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <div><strong>{t('qualification')}:</strong> {candidate.qualification}</div>
               <div><strong>{t('occupation')}:</strong> {candidate.occupation}</div>
-              <div><strong>{t('income')}:</strong> {candidate.income} | <strong>{t('workLocation') || 'Work Location'}:</strong> {candidate.placeOfJob}</div>
+              <div><strong>{t('income')}:</strong> {candidate.income}</div>
+              <div><strong>{t('workLocation') || 'Work Location'}:</strong> {candidate.placeOfJob}</div>
               <div><strong>{t('assets') || 'Assets'}:</strong> {candidate.assets}</div>
               <div><strong>{t('height')}:</strong> {candidate.height} | <strong>{t('weight')}:</strong> {candidate.weight}</div>
               <div><strong>{t('diet')}:</strong> {candidate.diet} | <strong>{t('complexion')}:</strong> {candidate.complexion}</div>
@@ -193,19 +192,22 @@ export default function ProfileView() {
           </div>
         </div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', fontSize: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '10px', fontSize: '11.5px' }}>
           <div>
-            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '6px', fontSize: '13px' }}>{t('astrologicalDetails')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div><strong>{t('caste')}:</strong> {candidate.caste} | <strong>{t('subCaste')}:</strong> {candidate.subCaste}</div>
-              <div><strong>{t('star')}:</strong> {candidate.star} | <strong>{t('raasi')}:</strong> {candidate.raasi}</div>
-              <div><strong>லக்னம் (Laknam):</strong> {candidate.laknam} | <strong>{t('gothram')}:</strong> {candidate.gothram}</div>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '4px', fontSize: '12.5px' }}>{t('astrologicalDetails')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div><strong>{t('caste')}:</strong> {candidate.caste}</div>
+              <div><strong>{t('subCaste')}:</strong> {candidate.subCaste}</div>
+              <div><strong>{t('star')}:</strong> {candidate.star}</div>
+              <div><strong>{t('raasi')}:</strong> {candidate.raasi}</div>
+              <div><strong>லக்னம் (Laknam):</strong> {candidate.laknam}</div>
+              <div><strong>{t('gothram')}:</strong> {candidate.gothram}</div>
               <div><strong>{t('dasaBalance') || 'Dasa Balance'}:</strong> {candidate.horoscopeBalance}</div>
             </div>
           </div>
           <div>
-            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '6px', fontSize: '13px' }}>{t('communicationDetails')}</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <h4 style={{ color: '#000', borderBottom: '1px solid #ccc', paddingBottom: '2px', marginBottom: '4px', fontSize: '12.5px' }}>{t('communicationDetails')}</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <div><strong>{t('contactPerson')}:</strong> {candidate.contactPerson} ({candidate.contactNumber})</div>
               <div><strong>{t('address')}:</strong> {candidate.presentAddress}</div>
               <div><strong>{t('expectation') || 'Expectations'}:</strong> {candidate.partnerComments}</div>
