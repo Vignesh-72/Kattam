@@ -41,46 +41,71 @@ export default function ProfileView() {
   };
 
   const handleExportPDF = async () => {
-    // Save original scroll position
     const originalScroll = window.scrollY;
-    // Scroll to top to prevent html2canvas out-of-viewport clipping bug
-    window.scrollTo(0, 0);
+    try {
+      // Scroll to top to prevent html2canvas out-of-viewport clipping bug
+      window.scrollTo(0, 0);
 
-    const page1 = document.getElementById('print-page-1');
-    const page2 = document.getElementById('print-page-2');
-    
-    if (!page1) return;
-    
-    // Slight delay to allow DOM to settle after scroll
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-    
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    
-    // Page 1
-    const canvas1 = await html2canvas(page1, { scale: 2, useCORS: true, scrollY: 0 });
-    const imgData1 = canvas1.toDataURL('image/jpeg', 1.0);
-    const pdfHeight1 = (canvas1.height * pdfWidth) / canvas1.width;
-    pdf.addImage(imgData1, 'JPEG', 0, 0, pdfWidth, pdfHeight1);
-    
-    // Page 2
-    if (page2 && (candidate.rasiKattam || candidate.amsamKattam)) {
-      pdf.addPage();
-      const canvas2 = await html2canvas(page2, { scale: 2, useCORS: true, scrollY: 0 });
-      const imgData2 = canvas2.toDataURL('image/jpeg', 1.0);
-      const pdfHeight2 = (canvas2.height * pdfWidth) / canvas2.width;
-      pdf.addImage(imgData2, 'JPEG', 0, 0, pdfWidth, pdfHeight2);
+      const page1 = document.getElementById('print-page-1');
+      const page2 = document.getElementById('print-page-2');
+      
+      if (!page1) return;
+      
+      // Slight delay to allow DOM to settle after scroll
+      await new Promise(resolve => setTimeout(resolve, 80));
+      
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      
+      // Page 1 Export & Low-Mem Cleanup
+      let canvas1: HTMLCanvasElement | null = await html2canvas(page1, {
+        scale: 1.8,
+        useCORS: true,
+        scrollY: 0,
+        logging: false
+      });
+      const imgData1 = canvas1.toDataURL('image/jpeg', 0.85);
+      const pdfHeight1 = (canvas1.height * pdfWidth) / canvas1.width;
+      pdf.addImage(imgData1, 'JPEG', 0, 0, pdfWidth, pdfHeight1);
+
+      // Free Page 1 canvas V8 heap memory immediately
+      canvas1.width = 0;
+      canvas1.height = 0;
+      canvas1 = null;
+      
+      // Page 2 Export & Low-Mem Cleanup
+      if (page2 && (candidate.rasiKattam || candidate.amsamKattam)) {
+        pdf.addPage();
+        let canvas2: HTMLCanvasElement | null = await html2canvas(page2, {
+          scale: 1.8,
+          useCORS: true,
+          scrollY: 0,
+          logging: false
+        });
+        const imgData2 = canvas2.toDataURL('image/jpeg', 0.85);
+        const pdfHeight2 = (canvas2.height * pdfWidth) / canvas2.width;
+        pdf.addImage(imgData2, 'JPEG', 0, 0, pdfWidth, pdfHeight2);
+
+        // Free Page 2 canvas V8 heap memory immediately
+        canvas2.width = 0;
+        canvas2.height = 0;
+        canvas2 = null;
+      }
+      
+      pdf.save(`${candidate.fullName}_Profile.pdf`);
+    } catch (err) {
+      console.error('[ProfileView] PDF Export Error:', err);
+      alert('Could not export PDF. Please check system memory and try again.');
+    } finally {
+      // Restore scroll position cleanly
+      window.scrollTo(0, originalScroll);
     }
-    
-    pdf.save(`${candidate.fullName}_Profile.pdf`);
-    
-    // Restore scroll position
-    window.scrollTo(0, originalScroll);
   };
 
   // Helper for readonly grid
