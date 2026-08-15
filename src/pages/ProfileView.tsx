@@ -22,13 +22,9 @@ export default function ProfileView() {
 
   if (!candidate) return <div>Loading...</div>;
 
-  let rasiData: Record<number, string[]> = {};
-  let amsamData: Record<number, string[]> = {};
   let extraData: Record<string, string> = {};
   let chartDataError = false;
   try {
-    rasiData = JSON.parse(candidate.rasiKattam || '{}');
-    amsamData = JSON.parse(candidate.amsamKattam || '{}');
     extraData = JSON.parse(candidate.additionalInfo || '{}');
   } catch (e) {
     // BUG-07: Was silent `catch(e) {}` — malformed JSON rendered blank charts with no feedback.

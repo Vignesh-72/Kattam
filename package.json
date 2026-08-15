@@ -1,7 +1,20 @@
 {
-  "name": "app",
-  "private": true,
-  "version": "0.0.0",
+  "name": "kattam-matrimony",
+  "version": "1.0.0",
+  "description": "Offline-first matrimonial candidate management system with Vedic astrology support",
+  "license": "MIT",
+  "author": {
+    "name": "Vignesh-72",
+    "url": "https://github.com/Vignesh-72"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vignesh-72/Kattam.git"
+  },
+  "homepage": "https://github.com/Vignesh-72/Kattam#readme",
+  "bugs": {
+    "url": "https://github.com/Vignesh-72/Kattam/issues"
+  },
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -46,12 +59,35 @@
       "target": [
         "AppImage",
         "deb"
-      ]
+      ],
+      "maintainer": "Vignesh-72 <vignesh@kattam.app>",
+      "category": "Office"
     },
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "signingHashAlgorithms": [],
+      "sign": null
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.utilities"
     }
   },
   "devDependencies": {
@@ -66,7 +102,7 @@
     "concurrently": "^10.0.4",
     "cross-env": "^10.1.0",
     "electron": "^28.3.3",
-    "electron-builder": "^26.15.3",
+    "electron-builder": "^25.1.8",
     "electron-rebuild": "^3.2.9",
     "eslint": "^9.13.0",
     "eslint-plugin-react-hooks": "^5.0.0",

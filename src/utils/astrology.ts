@@ -38,7 +38,7 @@ export function calculateVedicChart(dateStr: string, timeStr: string, lat: numbe
   const obl = tilt.tobl * Math.PI / 180;
 
   bodies.forEach(body => {
-    const eq = Astronomy.Equator(body, time, observer, true, true);
+    const eq = Astronomy.Equator(body as unknown as Astronomy.Body, time, observer, true, true);
     const ra = eq.ra * 15 * Math.PI / 180; 
     const dec = eq.dec * Math.PI / 180;
 

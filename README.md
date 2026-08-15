@@ -8,7 +8,8 @@
   ![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)
   ![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)
   ![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
-  ![License](https://img.shields.io/badge/License-Private-red)
+  ![License](https://img.shields.io/badge/License-MIT-green)
+  [![GitHub](https://img.shields.io/badge/GitHub-Vignesh--72%2FKattam-181717?logo=github)](https://github.com/Vignesh-72/Kattam)
 </div>
 
 ---
@@ -294,6 +295,7 @@ The app supports **English** and **Tamil** through a lightweight custom i18n sys
 |---|---|---|
 | Linux | `.AppImage`, `.deb` | `dist-electron/` |
 | Windows | NSIS `.exe` installer | `dist-electron/` |
+| macOS | `.dmg`, `.zip` (x64 & arm64) | `dist-electron/` |
 
 The build uses `electron-builder` with ASAR packaging. The `sqlite3` native module is explicitly unpacked from ASAR to ensure correct loading:
 ```json
@@ -304,6 +306,11 @@ The build uses `electron-builder` with ASAR packaging. The `sqlite3` native modu
 
 ## 📜 License
 
-**Private — Internal use only. All rights reserved.**
+This project is licensed under the **MIT License** — see the [LICENSE](https://github.com/Vignesh-72/Kattam/blob/main/LICENSE) file for full details.
 
-This software is proprietary and intended exclusively for licensed matrimonial bureau operators. Redistribution, modification, or use outside of the authorised context is strictly prohibited.
+```
+MIT License — Copyright (c) 2026 Vignesh-72
+https://github.com/Vignesh-72/Kattam
+```
+
+You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of this software, provided the copyright notice and permission notice are included in all copies or substantial portions of the Software.

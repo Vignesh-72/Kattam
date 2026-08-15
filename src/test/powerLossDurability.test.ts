@@ -7,13 +7,6 @@ import crypto from 'crypto';
 const TEST_DIR = path.join(__dirname, 'power_loss_scratch');
 const TEST_DB_PATH = path.join(TEST_DIR, 'test_matrimony.db');
 
-function copyFileWithFsync(srcPath: string, destPath: string) {
-  const data = fs.readFileSync(srcPath);
-  const fd = fs.openSync(destPath, 'w');
-  fs.writeSync(fd, data);
-  fs.fsyncSync(fd);
-  fs.closeSync(fd);
-}
 
 function safeWriteFileSync(filePath: string, buffer: Buffer) {
   const fd = fs.openSync(filePath, 'w');
@@ -74,7 +67,7 @@ describe('POWER-LOSS & DATA DURABILITY TEST SUITE (TC-PWR-01 to TC-PWR-05)', () 
     const reopenedDb = new sqlite3.Database(TEST_DB_PATH);
 
     const integrityResult = await new Promise<string>((resolve) => {
-      reopenedDb.get('PRAGMA quick_check;', (err, row: any) => {
+      reopenedDb.get('PRAGMA quick_check;', (_err, row: any) => {
         resolve(row ? (row.quick_check || Object.values(row)[0]) : 'error');
       });
     });
@@ -83,7 +76,7 @@ describe('POWER-LOSS & DATA DURABILITY TEST SUITE (TC-PWR-01 to TC-PWR-05)', () 
     expect(integrityResult).toBe('ok');
 
     const countResult = await new Promise<number>((resolve) => {
-      reopenedDb.get('SELECT COUNT(*) as count FROM candidates', (err, row: any) => {
+      reopenedDb.get('SELECT COUNT(*) as count FROM candidates', (_err, row: any) => {
         resolve(row ? row.count : 0);
       });
     });
@@ -128,7 +121,7 @@ describe('POWER-LOSS & DATA DURABILITY TEST SUITE (TC-PWR-01 to TC-PWR-05)', () 
 
     // Perform diagnostic check
     const status = await new Promise<string>((resolve) => {
-      db.get('PRAGMA quick_check;', (err, row: any) => {
+      db.get('PRAGMA quick_check;', (_err, row: any) => {
         resolve(row ? (row.quick_check || Object.values(row)[0]) : 'error');
       });
     });

@@ -43,13 +43,7 @@ export default function DataEntry() {
     sistersMarried: '0'
   });
 
-  const [activeSection, setActiveSection] = useState('personal');
   const [hasDraft, setHasDraft] = useState(false);
-
-  const scrollTo = (id: string) => {
-    setActiveSection(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   // Check for unsaved draft from previous session on mount
   useEffect(() => {

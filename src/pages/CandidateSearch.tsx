@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Edit, Eye, Trash2, ChevronLeft, ChevronRight, Filter, RefreshCw, UserCheck, Compass, Briefcase, Heart } from 'lucide-react';
+import { Search, Edit, Eye, Trash2, ChevronLeft, ChevronRight, Filter, RefreshCw, UserCheck, Compass, Briefcase } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 
 interface SearchOptions {
@@ -150,6 +150,7 @@ export default function CandidateSearch() {
   const dietOptions = useMemo(() => dbOptions.diets || [], [dbOptions.diets]);
   const partnerJobReqOptions = useMemo(() => dbOptions.partnerJobReqs || [], [dbOptions.partnerJobReqs]);
   const partnerHoroscopeReqOptions = useMemo(() => dbOptions.partnerHoroscopeReqs || [], [dbOptions.partnerHoroscopeReqs]);
+  void dietOptions; void partnerJobReqOptions; void partnerHoroscopeReqOptions;
   const maritalStatusOptions = useMemo(() => dbOptions.maritalStatuses || [], [dbOptions.maritalStatuses]);
 
   // Triggers search query execution ONLY when user clicks Search / presses Enter
@@ -461,7 +462,7 @@ export default function CandidateSearch() {
               <div>
                 <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px', display: 'block' }}>{t('maritalStatus')}</label>
                 <select className="form-control" value={filters.maritalStatus} onChange={e => handleFilterChange('maritalStatus', e.target.value)}>
-                  <option value="">{t('allMaritalStatuses') || t('allMaritalStatus') || "All Marital Statuses"}</option>
+                  <option value="">{t('allMaritalStatuses' as any) || "All Marital Statuses"}</option>
                   {maritalStatusOptions.map(ms => (
                     <option key={ms} value={ms}>{ms}</option>
                   ))}
@@ -772,7 +773,7 @@ export default function CandidateSearch() {
               fontSize: '0.9rem',
               border: '1px solid rgba(122, 46, 46, 0.2)'
             }}>
-              {t('page')} {page} / {totalPages}
+              Page {page} / {totalPages}
             </div>
 
             {/* Next Page Button */}
