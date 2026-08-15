@@ -1,0 +1,197 @@
+name: Build & Release Kattam Matrimony
+
+on:
+  push:
+    tags:
+      - "v*.*.*"           # Triggers on any version tag: v1.0.0, v1.2.3, etc.
+  workflow_dispatch:        # Allow manual trigger from GitHub Actions UI
+    inputs:
+      draft:
+        description: "Create as draft release?"
+        required: false
+        default: "true"
+        type: boolean
+
+permissions:
+  contents: write           # Required to create GitHub Releases and upload assets
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 1: Linux — builds .deb + .AppImage on ubuntu-latest
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-linux:
+    name: 🐧 Build Linux (deb + AppImage)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Linux installers
+        run: npm run electron:build -- --linux deb AppImage
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-installers
+          path: |
+            dist-electron/*.deb
+            dist-electron/*.AppImage
+          retention-days: 5
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 2: Windows — builds NSIS .exe on windows-latest
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-windows:
+    name: 🪟 Build Windows (NSIS .exe)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Windows installer
+        run: npm run electron:build -- --win nsis
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false   # Skip code signing (no cert)
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist-electron/*.exe
+          retention-days: 5
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 3: macOS — builds .dmg + .zip on macos-latest (Apple Silicon + x64)
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-macos:
+    name: 🍎 Build macOS (DMG)
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build macOS installer
+        run: npm run electron:build -- --mac dmg zip --x64 --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false   # Skip Apple code signing (no cert)
+          APPLE_ID: ""
+          APPLE_APP_SPECIFIC_PASSWORD: ""
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-installer
+          path: |
+            dist-electron/*.dmg
+            dist-electron/*.zip
+          retention-days: 5
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 4: Release — waits for all builds, then creates GitHub Release
+  # ─────────────────────────────────────────────────────────────────────────────
+  create-release:
+    name: 🚀 Create GitHub Release
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: List release assets
+        run: ls -lh release-assets/
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Kattam Matrimony ${{ steps.version.outputs.VERSION }}"
+          draft: ${{ github.event.inputs.draft || 'false' }}
+          prerelease: false
+          generate_release_notes: false
+          body: |
+            ## 🎉 Kattam Matrimony ${{ steps.version.outputs.VERSION }}
+
+            > Offline-first matrimonial bureau management system with Vedic astrology, bilingual support, and PDF export.
+
+            ---
+
+            ### 📦 Downloads
+
+            | Platform | File | Notes |
+            |---|---|---|
+            | 🐧 Linux | `*.AppImage` | Portable — no install needed. Run with `chmod +x` then double-click |
+            | 🐧 Linux | `*.deb` | Debian/Ubuntu — install with `sudo dpkg -i` |
+            | 🪟 Windows | `*Setup*.exe` | One-click NSIS installer |
+            | 🍎 macOS | `*.dmg` | Drag to Applications folder |
+
+            ---
+
+            ### 🖥️ System Requirements
+
+            | Component | Minimum |
+            |---|---|
+            | OS | Windows 10 64-bit / Ubuntu 20.04+ / macOS 12+ |
+            | CPU | 1.6 GHz Dual-Core |
+            | RAM | 2 GB |
+            | Storage | ~300 MB |
+
+            ---
+
+            ### 🔗 Links
+            - 📖 [README & Documentation](https://github.com/Vignesh-72/Kattam#readme)
+            - 🐛 [Report a Bug](https://github.com/Vignesh-72/Kattam/issues)
+            - 📜 [MIT License](https://github.com/Vignesh-72/Kattam/blob/main/LICENSE)
+
+            > ⚠️ **Note:** Windows and macOS installers are unsigned (no code signing certificate).
+            > Windows may show a SmartScreen warning — click **More info → Run anyway** to proceed.
+            > macOS may show a Gatekeeper warning — right-click the DMG → Open.
+          files: release-assets/*
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
