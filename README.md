@@ -10,11 +10,12 @@
   ![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
   ![License](https://img.shields.io/badge/License-MIT-green)
   [![GitHub](https://img.shields.io/badge/GitHub-Vignesh--72%2FKattam-181717?logo=github)](https://github.com/Vignesh-72/Kattam)
+
+  <br/>
+  <img width="100%" alt="Kattam Matrimony App Screenshot" src="https://github.com/user-attachments/assets/f9aaa16d-f64b-4a5a-983d-4be9f5359716" />
 </div>
 
 ---
-
-<img width="2026" height="662" alt="asset1_trans" src="https://github.com/user-attachments/assets/f9aaa16d-f64b-4a5a-983d-4be9f5359716" />
 
 ## 📖 Overview
 
