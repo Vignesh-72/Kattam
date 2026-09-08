@@ -3,6 +3,7 @@
   <h1>Kattam Matrimony</h1>
   <p><strong>A professional, offline-first matrimonial candidate management system</strong><br/>Built for internal bureau use. Engineered to run reliably on low-spec hardware.</p>
 
+  [![SourceForge](https://img.shields.io/badge/SourceForge-Kattam-EE6600?logo=sourceforge&logoColor=white)](https://sourceforge.net/projects/kattam/)
   ![Electron](https://img.shields.io/badge/Electron-28-47848F?logo=electron&logoColor=white)
   ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
   ![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)
@@ -14,6 +15,14 @@
   <br/>
   <img width="100%" alt="Kattam Matrimony App Screenshot" src="https://github.com/user-attachments/assets/f9aaa16d-f64b-4a5a-983d-4be9f5359716" />
 </div>
+
+---
+
+## 📥 Downloads & Releases
+
+Packaged installers and release builds are hosted on SourceForge:
+
+👉 **[Download Kattam Matrimony on SourceForge](https://sourceforge.net/projects/kattam/)**
 
 ---
 
