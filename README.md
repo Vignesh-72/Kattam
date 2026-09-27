@@ -27,6 +27,7 @@ Packaged installers and release builds are hosted on SourceForge:
 ---
 
 ## 📖 Overview
+https://github.com/user-attachments/assets/04f3adcd-72d9-492d-8883-bbb3ae685aae
 
 **Kattam Matrimony** is a full-featured, desktop-native matrimonial bureau management application. It handles the complete lifecycle of a matrimonial candidate — from data entry and horoscope chart generation to profile search, viewing, and PDF export — all without any internet connection.
 
